@@ -31,7 +31,7 @@ class Match
                 rejected: other.board.rejected.length,
             };
             var strategy = new player.class();
-            strategy.run(_.cloneDeep(board), otherInfo);
+            var move = strategy.move(_.cloneDeep(board), otherInfo);
         }
     }
 
