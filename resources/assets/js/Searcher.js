@@ -1,7 +1,7 @@
 
 class Searcher
 {
-    construct()
+    constructor()
     {
         this.compares = [];
     }
@@ -41,13 +41,19 @@ class Searcher
 
     misses(objects)
     {
-        return objects.reject((object) => this.test(object));
+        return objects.filter((object) => !this.test(object));
     }
 }
+Searcher.where = function (...args) {
+    return new Searcher().where(...args);
+};
+Searcher.push = function (...args) {
+    return new Searcher().push(...args);
+};
 
 class And
 {
-    construct(compares)
+    constructor(compares)
     {
         this.compares = compares;
     }
@@ -62,7 +68,7 @@ class And
 
 class Or
 {
-    construct(compares)
+    constructor(compares)
     {
         this.compares = compares;
     }
@@ -70,16 +76,16 @@ class Or
     test(object)
     {
         // find the first matching value
-        return this.compares.find((compare) => (bool)compare.test(object));
+        return !!this.compares.find((compare) => compare.test(object));
     }
 }
 
 class Compare
 {
-    construct(field, comparison, value)
+    constructor(field, comparison, value)
     {
         comparison = comparison + '';
-        if (!Compare.operators.contains(comparison)) {
+        if (!Compare.operators.includes(comparison)) {
             throw new Error('Unknown comparison operator: ' + comparison);
         }
         this.field = field + '';
@@ -107,10 +113,9 @@ class Compare
         }
     }
 }
-
 Compare.operators = ['=', '<', '<=', '>', '>=', 'REGEX'];
 
 Searcher.Or = Or;
-Search.And = And;
+Searcher.And = And;
 
 module.exports = Searcher;
