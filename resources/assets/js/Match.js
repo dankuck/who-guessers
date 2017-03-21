@@ -27,10 +27,11 @@ class Match
             var other = this.notCurrent();
             var otherInfo = {
                 name: other.name,
-                board: other.board,
+                remaining: other.board.remaining.length,
+                rejected: other.board.rejected.length,
             };
             var strategy = new player.class();
-            strategy.run(board, otherInfo);
+            strategy.run(_.cloneDeep(board), otherInfo);
         }
     }
 
