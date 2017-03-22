@@ -13,11 +13,13 @@ class ChampionshipMatch
             board: new Board(_.shuffle(_.cloneDeep(whos))),
             player: playerA,
             who: deck.pop(),
+            log: [],
         };
         this.b = {
             board: new Board(_.shuffle(_.cloneDeep(whos))),
             player: playerB,
             who: deck.pop(),
+            log: [],
         };
         this.current = this.a;
         this.other = this.b;
@@ -47,7 +49,7 @@ class ChampionshipMatch
     {
         this.turns++;
         var strategy = this.buildStrategy(this.current.player);
-        var move = strategy.move(_.cloneDeep(this.currentInfo()), _.cloneDeep(this.otherInfo()));
+        var move = strategy.move(_.cloneDeep(this.currentInfo()), _.cloneDeep(this.otherInfo()), (text) => this.current.log.push(text));
         this.handleMove(move);
         this.switch();
     }
@@ -112,6 +114,7 @@ class ChampionshipMatch
             turns: this.turns,
             winning: winning,
             players: [this.a.player, this.b.player],
+            logs: [this.a.log, this.b.log],
         };
     }
 
@@ -128,6 +131,7 @@ class ChampionshipMatch
             turns: this.turns,
             winner: (winner === this.a ? 0 : 1),
             players: [this.a.player, this.b.player],
+            logs: [this.a.log, this.b.log],
         };
         this.doneEvents.fire(result);
     }
