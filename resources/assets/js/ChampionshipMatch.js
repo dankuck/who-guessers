@@ -139,11 +139,13 @@ class ChampionshipMatch
     onDone(closure)
     {
         this.doneEvents.on(closure);
+        return this;
     }
 
     onProgress(closure)
     {
         this.progressEvents.on(closure);
+        return this;
     }
 
     /**

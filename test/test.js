@@ -456,7 +456,7 @@ describe('StrategyIterator', function() {
         it('builds', function() {
             new StrategyIterator(['a', 'b']);
         });
-        it('#next gives a,a; a,b; b,a; b,b', function() {
+        it('#next gives a,a; a,b; b,a; b,b; <null>', function() {
             var it = new StrategyIterator(['a', 'b']);
             var x, y;
 
@@ -476,11 +476,15 @@ describe('StrategyIterator', function() {
             assert.equal('b', x);
             assert.equal('b', y);
 
-            x = it.next();
-            assert.equal(null, x);
+            assert(it.next() === null);
         });
     });
 });
+
+describe('Championship', function() {
+    
+});
+
 
 
 

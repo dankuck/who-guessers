@@ -1,3 +1,5 @@
+const Eventer = require('./Eventer.js');
+const ChampionshipMatch = require('./ChampionshipMatch.js');
 
 class Championship
 {
@@ -11,31 +13,67 @@ class Championship
         this.strategies = strategies;
         this.matchCount = matchCount;
         this.matches = 0;
+        this.results = [];
 
-        this.progressWatchers = [];
-        this.doneWatchers = [];
+        this.progressEvents = new Eventer();
+        this.doneEvents = new Eventer();
 
         this.strategyIterator = new StrategyIterator(this.strategies);
-        this.runNext();
     }
 
-    runNext()
+    run()
     {
-        var competitors = this.nextCompetitors();
-        if (!competitors) {
-            this.fireDone();
-            return;
+        if (this.runner || this.finished) {
+            return; // already running
         }
-        var match = new Match(competitors[0], competitors[1]);
-        match.run();
-        //this.results.push, somehow push results
-        this.fireProgress();
-        setTimeout(() => this.runNext(), 1);
+        this.nextStep();
     }
 
-    stop() 
+    stop()
     {
-        clearInterval(this.running);
+        if (this.runner) {
+            clearTimeout(this.runner);
+            this.runner = null;
+        }
+    }
+
+    nextStep()
+    {
+        this.runner = setTimeout(() => {
+            this.runStep().then(() => {
+                if (!this.finished) {
+                    this.nextStep();
+                } else {
+                    this.runner = null;
+                }
+            });
+        }, 0);
+    }
+
+    runStep()
+    {
+        return new Promise((resolve, error) => {
+            var competitors = this.nextCompetitors();
+            if (!competitors) {
+                this.finish();
+                return;
+            }
+            this.currentMatch = new ChampionshipMatch(competitors[0], competitors[1])
+                .onProgress((progress) => {
+                    this.progressEvents.fire({
+                        matches: this.matches,
+                        results: this.results,
+                        currentMatch: progress,
+                        progress: this.matches / this.matchCount,
+                    });
+                })
+                .onDone((result) => {
+                    this.currentMatch = null;
+                    this.results.push(result);
+                    resolve();
+                })
+                .run();
+        });
     }
 
     nextCompetitors()
@@ -44,8 +82,9 @@ class Championship
         while (!competitors) {
             this.matches++;
             if (this.matches >= this.matchCount) {
-                return //done
+                return; //done
             }
+            this.strategyIterator = new StrategyIterator(this.strategies);
             competitors = this.strategyIterator.next();
         }
         return competitors;
@@ -53,22 +92,23 @@ class Championship
 
     onProgress(closure)
     {
-        this.progressWatchers.push(closure);
-    }
-
-    fireProgress(progress)
-    {
-        this.progressWatchers.each((watcher) => watcher(progress));
+        this.progressEvents.on(closure);
+        return this;
     }
 
     onDone(closure)
     {
-        this.doneWatchers.push(closure);
+        this.doneEvents.on(closure);
+        return this;
     }
 
-    fireDone()
+    finish()
     {
-        this.doneWatchers.each((watcher) => watcher());
+        this.finished = true;
+        this.doneEvents.fire({
+            matches: this.matches,
+            results: this.results,
+        });
     }
 }
 
