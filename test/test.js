@@ -1,5 +1,6 @@
 var assert = require('assert');
 var Searcher = require('../resources/assets/js/Searcher.js');
+var Board = require('../resources/assets/js/Board.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -132,38 +133,72 @@ describe('Searcher', function() {
             assert.equal(1, tested);
         });
     });
+});
 
-    describe('#matches', function() {
-        it('should return all input', function() {
-            assert.equal(2, Searcher.push(/test/).matches(['tested', 'retest']).length);
+describe('Board', function() {
+    describe('#constructor', function() {
+        it('should instantiate', function() {
+            new Board();
         });
-        it('should return first input of two', function() {
-            assert.equal(1, Searcher.push(/test/).matches(['tested', 'nope']).length);
-        });
-        it('should return second input of two', function() {
-            assert.equal(1, Searcher.push(/test/).matches(['nope', 'retest']).length);
-        });
-        it('should return no input', function() {
-            assert.equal(0, Searcher.push(/test/).matches(['nope', 'scope']).length);
+        it('should start with all remaining', function() {
+            var b = new Board(['x', 'y', 'z']);
+            assert.equal(b.remaining.length, 3);
+            assert.equal(b.rejected.length, 0);
         });
     });
-
-    describe('#misses', function() {
-        it('should return no input', function() {
-            assert.equal(0, Searcher.push(/test/).misses(['tested', 'retest']).length);
+    describe('rejectMatches', function() {
+        it('should reject 0', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMatches(/a/);
+            assert.equal(b.remaining.length, 3);
+            assert.equal(b.rejected.length, 0);
         });
-        it('should return last input of three', function() {
-            assert.equal(1, Searcher.push(/test/).misses(['tested', 'retest', 'nope']).length);
+        it('should reject 1', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMatches(/z/);
+            assert.equal(b.remaining.length, 2);
+            assert.equal(b.rejected.length, 1);
         });
-        it('should return first input of three', function() {
-            assert.equal(1, Searcher.push(/test/).misses(['nope', 'tested', 'retest']).length);
+        it('should reject 2', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMatches(/[yz]/);
+            assert.equal(b.remaining.length, 1);
+            assert.equal(b.rejected.length, 2);
         });
-        it('should return all input', function() {
-            assert.equal(2, Searcher.push(/test/).misses(['nope', 'scope']).length);
+        it('should reject all 3', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMatches(/./);
+            assert.equal(b.remaining.length, 0);
+            assert.equal(b.rejected.length, 3);
+        });
+    });
+    describe('rejectMisses', function() {
+        it('should reject all', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMisses(/a/);
+            assert.equal(b.remaining.length, 0);
+            assert.equal(b.rejected.length, 3);
+        });
+        it('should reject 2', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMisses(/z/);
+            assert.equal(b.remaining.length, 1);
+            assert.equal(b.rejected.length, 2);
+        });
+        it('should reject 1', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMisses(/[yz]/);
+            assert.equal(b.remaining.length, 2);
+            assert.equal(b.rejected.length, 1);
+        });
+        it('should reject 0', function() {
+            var b = new Board(['x', 'y', 'z']);
+            b.rejectMisses(/./);
+            assert.equal(b.remaining.length, 3);
+            assert.equal(b.rejected.length, 0);
         });
     });
 });
-
 
 
 

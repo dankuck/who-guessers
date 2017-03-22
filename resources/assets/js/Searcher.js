@@ -33,16 +33,6 @@ class Searcher
     {
         return new And(this.compares).test(object);
     }
-
-    matches(objects)
-    {
-        return objects.filter((object) => this.test(object));
-    }
-
-    misses(objects)
-    {
-        return objects.filter((object) => !this.test(object));
-    }
 }
 Searcher.where = function (...args) {
     return new Searcher().where(...args);
