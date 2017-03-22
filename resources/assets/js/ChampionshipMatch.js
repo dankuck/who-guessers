@@ -19,9 +19,11 @@ class ChampionshipMatch
             who: deck.pop(),
         };
         this.current = this.a;
+        this.other = this.b;
         this.doneEvents = new Eventer();
         this.progressEvents = new Eventer();
         this.finished = false;
+        this.turns = 0;
     }
 
     run()
@@ -42,6 +44,7 @@ class ChampionshipMatch
 
     runStep()
     {
+        this.turns++;
         var strategy = this.buildStrategy(this.current.player);
         var move = strategy.move(_.cloneDeep(this.current.board), this.otherInfo());
         this.handleMove(move);
@@ -67,21 +70,48 @@ class ChampionshipMatch
 
     switch()
     {
-        this.current = this.other();
+        if (this.current == this.a) {
+            this.current = this.b;
+            this.other = this.a;
+        } else {
+            this.current = this.a;
+            this.other = this.b;
+        }
     }
 
-    handleMove()
+    handleMove(move)
     {
         if (typeof move === 'string') {
             this.finish(move);
             return;
         }
-        if (move.test(other.who)) {
-            board.rejectMisses(move);
+        if (move.test(this.other.who)) {
+            this.current.board.rejectMisses(move);
         } else {
-            board.rejectMatches(move);
+            this.current.board.rejectMatches(move);
         }
-        this.progressEvents.fire(this.stateSummary());
+        this.progressEvents.fire(this.getStateSummary());
+    }
+
+    getStateSummary()
+    {
+    }
+
+    finish(answer)
+    {
+        this.finished = true;
+        var winner;
+        if (answer == this.other.who) {
+            winner = this.current;
+        } else {
+            winner = this.other;
+        }
+        var result = {
+            turns: this.turns,
+            winner: (winner === this.a ? 0 : 1),
+            players: [this.a, this.b],
+        };
+        this.doneEvents.fire(result);
     }
 
     onDone(closure)
@@ -94,22 +124,12 @@ class ChampionshipMatch
         this.progressEvents.on(closure);
     }
 
-    other()
-    {
-        if (this.current === this.a) {
-            return this.b;
-        } else {
-            return this.a;
-        }
-    }
-
     otherInfo()
     {
-        var other = this.other();
         return {
-            name: other.name,
-            remaining: other.board.remaining.length,
-            rejected: other.board.rejected.length,
+            name: this.other.player.name,
+            remaining: this.other.board.remaining.length,
+            rejected: this.other.board.rejected.length,
         };
     }
 }

@@ -292,6 +292,116 @@ describe('ChampionshipMatch', function() {
             }, 20);
         });
     });
+    describe('#runStep', function() {
+        it('should get a move and handle it', function() {
+            var caughtMove;
+            var m = new ChampionshipMatch({}, {}, []);
+            m.otherInfo = function(){};
+            m.buildStrategy = function() {
+                return {
+                    move() {
+                        return 'XXXX';
+                    }
+                };
+            };
+            m.handleMove = function(move) {
+                caughtMove = move;
+            };
+            m.runStep();
+            assert.equal(caughtMove, 'XXXX');
+        });
+    });
+    describe('#buildStrategy', function() {
+        it('should new up a class', function() {
+            class X{}
+            var m = new ChampionshipMatch({}, {}, []);
+            var x = m.buildStrategy({class: X});
+            assert(x instanceof X);
+        });
+    });
+    describe('#switch', function() {
+        it('should switch out the current player with the other one', function() {
+            var a = {};
+            var b = {};
+            var m = new ChampionshipMatch(a, b, []);
+            assert.equal(m.current.player, a);
+            m.switch();
+            assert.equal(m.current.player, b);
+            m.switch();
+            assert.equal(m.current.player, a);
+        });
+    });
+    describe('#handleMove', function() {
+        it('should call finish()', function() {
+            var m = new ChampionshipMatch({}, {}, []);
+            var finished = false;
+            m.finish = function() { finished = true };
+            m.handleMove("string");
+            assert(finished);
+        });
+        it('should reject misses', function() {
+            var m = new ChampionshipMatch({}, {}, []);
+            var ran = 0;
+            m.a.board.rejectMisses = function() { ran++ };
+            m.handleMove({
+                test() {
+                    return true;
+                }
+            });
+            assert(ran, 1);
+        });
+        it('should reject matches', function() {
+            var m = new ChampionshipMatch({}, {}, []);
+            var ran = 0;
+            m.a.board.rejectMatches = function() { ran++ };
+            m.handleMove({
+                test() {
+                    return false;
+                }
+            });
+            assert(ran, 1);
+        });
+    });
+    describe('#finish', function() {
+        it('should finish with player A the winner', function() {
+            var m = new ChampionshipMatch({}, {}, []);
+            m.b.who = 'ABC';
+            var result;
+            m.onDone(function(doneData) {
+                result = doneData;
+            });
+            m.finish('ABC');
+            assert(m.finished);
+            assert.equal(result.turns, 0);
+            assert.equal(result.winner, 0);
+            assert(result.players instanceof Array);
+        });
+        it('should finish with player B the winner', function() {
+            var m = new ChampionshipMatch({}, {}, []);
+            m.b.who = 'XYZ';
+            var result;
+            m.onDone(function(doneData) {
+                result = doneData;
+            });
+            m.finish('ABC');
+            assert(m.finished);
+            assert.equal(result.turns, 0);
+            assert.equal(result.winner, 1);
+            assert(result.players instanceof Array);
+        });
+    });
+    describe('#otherInfo', function() {
+        it('should give the info of player b', function() {
+            var m = new ChampionshipMatch({}, {name: 'PlayerB'}, ['x', 'y', 'z']);
+            m.b.board.remaining = ['x', 'y'];
+            m.b.board.rejected = ['z'];
+            var info = m.otherInfo();
+            assert(info instanceof Object);
+            assert.equal(info.name, 'PlayerB');
+            assert.equal(info.remaining, 2);
+            assert.equal(info.rejected, 1);
+        });
+    });
 });
 
 
