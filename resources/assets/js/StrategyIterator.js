@@ -8,7 +8,7 @@ class StrategyIterator
     {
         this.strategies = strategies;
         this.aIndex = 0;
-        this.bIndex = 0;
+        this.bIndex = -1;
     }
 
     next()

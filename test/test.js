@@ -3,6 +3,7 @@ var Searcher = require('../resources/assets/js/Searcher.js');
 var Board = require('../resources/assets/js/Board.js');
 var Eventer = require('../resources/assets/js/Eventer.js');
 var ChampionshipMatch = require('../resources/assets/js/ChampionshipMatch.js');
+var StrategyIterator = require('../resources/assets/js/StrategyIterator.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -446,6 +447,37 @@ describe('ChampionshipMatch', function() {
             assert.equal(report.winning, 1);
             assert.equal(report.progress, 0);
             assert(report.players instanceof Array);
+        });
+    });
+});
+
+describe('StrategyIterator', function() {
+    describe('#instantiate', function() {
+        it('builds', function() {
+            new StrategyIterator(['a', 'b']);
+        });
+        it('#next gives a,a; a,b; b,a; b,b', function() {
+            var it = new StrategyIterator(['a', 'b']);
+            var x, y;
+
+            [x, y] = it.next();
+            assert.equal('a', x);
+            assert.equal('a', y);
+            
+            [x, y] = it.next();
+            assert.equal('a', x);
+            assert.equal('b', y);
+            
+            [x, y] = it.next();
+            assert.equal('b', x);
+            assert.equal('a', y);
+            
+            [x, y] = it.next();
+            assert.equal('b', x);
+            assert.equal('b', y);
+
+            x = it.next();
+            assert.equal(null, x);
         });
     });
 });
