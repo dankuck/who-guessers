@@ -73,7 +73,6 @@ class ChampionshipMatch
     handleMove()
     {
         if (typeof move === 'string') {
-            this.finished = true;
             this.finish(move);
             return;
         }

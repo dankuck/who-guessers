@@ -254,7 +254,42 @@ describe('Eventer', function() {
 describe('ChampionshipMatch', function() {
     describe('#instantiate', function() {
         it('should instantiate', function() {
-            new ChampionshipMatch({}, {}, []);
+            var m = new ChampionshipMatch({}, {}, []);
+            assert.equal(m.finished, false);
+        });
+    });
+    describe('#run & stop', function() {
+        it('should runStep a few times and then stop', function(done) {
+            var m = new ChampionshipMatch({}, {}, []);
+            var ran = 0;
+            m.runStep = function() { ran++ };
+            m.run();
+            setTimeout(function() {
+                m.stop();
+                assert(ran > 0);
+                assert.equal(m.runner, null);
+                done();
+            }, 10);
+        });
+        it('should runStep a few times, pause, runStep a few more times, then stop', function(done) {
+            var m = new ChampionshipMatch({}, {}, []);
+            var ran = 0;
+            var firstRun = 0;
+            m.runStep = function() { ran++ };
+            m.run();
+            setTimeout(function() {
+                m.stop();
+                assert(ran > 0);
+                firstRun = ran;
+                assert.equal(m.runner, null);
+                m.run();
+            }, 10);
+            setTimeout(function() {
+                m.stop();
+                assert(ran > firstRun);
+                assert.equal(m.runner, null);
+                done();
+            }, 20);
         });
     });
 });
