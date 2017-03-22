@@ -152,10 +152,10 @@ describe('Searcher', function() {
         it('should return no input', function() {
             assert.equal(0, Searcher.push(/test/).misses(['tested', 'retest']).length);
         });
-        it('should return first two inputs of three', function() {
+        it('should return last input of three', function() {
             assert.equal(1, Searcher.push(/test/).misses(['tested', 'retest', 'nope']).length);
         });
-        it('should return last two inputs of two', function() {
+        it('should return first input of three', function() {
             assert.equal(1, Searcher.push(/test/).misses(['nope', 'tested', 'retest']).length);
         });
         it('should return all input', function() {
