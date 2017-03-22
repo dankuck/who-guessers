@@ -1,6 +1,7 @@
 var assert = require('assert');
 var Searcher = require('../resources/assets/js/Searcher.js');
 var Board = require('../resources/assets/js/Board.js');
+var Eventer = require('../resources/assets/js/Eventer.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -200,7 +201,54 @@ describe('Board', function() {
     });
 });
 
-
+describe('Eventer', function() {
+    describe('#construct', function() {
+        it('should instantiate', function() {
+            new Eventer();
+        });
+    });
+    describe('#on', function() {
+        it('should accept a closure', function() {
+            new Eventer().on(function(){});
+        });
+        it('should return self', function() {
+            var ev = new Eventer();
+            assert.equal(ev.on(function(){}), ev);
+        });
+    });
+    describe('#fire', function() {
+        it('should do nothing', function() {
+            new Eventer().fire();
+        });
+        it('should fire one closure once', function() {
+            var ran = 0;
+            var ev = new Eventer().on(function(){ ran++ });
+            ev.fire();
+            assert.equal(ran, 1);
+        });
+        it('should fire one closure twice', function() {
+            var ran = 0;
+            var ev = new Eventer().on(function(){ ran++ });
+            ev.fire();
+            ev.fire();
+            assert.equal(ran, 2);
+        });
+        it('should fire two closures once each', function() {
+            var ran = 0;
+            var ev = new Eventer();
+            ev.on(function(){ ran++ });
+            ev.on(function(){ ran++ });
+            ev.fire();
+            assert.equal(ran, 2);
+        });
+        it('should pass args', function() {
+            var ran = '';
+            var ev = new Eventer().on(function(a, b){ ran = a + " " + b });
+            ev.fire('hello', 'world');
+            assert.equal(ran, 'hello world');
+        });
+    });
+});
 
 
 
