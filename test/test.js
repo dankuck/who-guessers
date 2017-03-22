@@ -2,6 +2,7 @@ var assert = require('assert');
 var Searcher = require('../resources/assets/js/Searcher.js');
 var Board = require('../resources/assets/js/Board.js');
 var Eventer = require('../resources/assets/js/Eventer.js');
+var ChampionshipMatch = require('../resources/assets/js/ChampionshipMatch.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -250,6 +251,13 @@ describe('Eventer', function() {
     });
 });
 
+describe('ChampionshipMatch', function() {
+    describe('#instantiate', function() {
+        it('should instantiate', function() {
+            new ChampionshipMatch({}, {}, []);
+        });
+    });
+});
 
 
 

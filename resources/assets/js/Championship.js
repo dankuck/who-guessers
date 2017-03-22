@@ -26,8 +26,8 @@ class Championship
             this.fireDone();
             return;
         }
-        var round = new Round(competitors[0], competitors[1]);
-        round.run();
+        var match = new Match(competitors[0], competitors[1]);
+        match.run();
         //this.results.push, somehow push results
         this.fireProgress();
         setTimeout(() => this.runNext(), 1);
