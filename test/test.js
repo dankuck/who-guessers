@@ -392,14 +392,60 @@ describe('ChampionshipMatch', function() {
     });
     describe('#otherInfo', function() {
         it('should give the info of player b', function() {
-            var m = new ChampionshipMatch({}, {name: 'PlayerB'}, ['x', 'y', 'z']);
+            var b = {};
+            var m = new ChampionshipMatch({}, b, ['x', 'y', 'z']);
             m.b.board.remaining = ['x', 'y'];
             m.b.board.rejected = ['z'];
             var info = m.otherInfo();
             assert(info instanceof Object);
-            assert.equal(info.name, 'PlayerB');
-            assert.equal(info.remaining, 2);
-            assert.equal(info.rejected, 1);
+            assert.equal(info.player, b);
+            assert.equal(info.board.remaining.length, 2);
+            assert.equal(info.board.rejected.length, 1);
+        });
+    });
+    describe('#currentInfo', function() {
+        it('shold give the info of player a', function() {
+            var a = {};
+            var m =  new ChampionshipMatch(a, {}, ['x', 'y', 'z']);
+            m.a.board.remaining = ['x', 'y'];
+            m.a.board.rejected = ['z'];
+            m.a.who = 'z';
+            var info = m.currentInfo();
+            assert(info instanceof Object);
+            assert.equal(info.player, a);
+            assert.equal(info.board.remaining.length, 2);
+            assert.equal(info.board.rejected.length, 1);
+            assert.equal(info.who, 'z');
+        });
+    });
+    describe('#getReport', function() {
+        it('should say that a is winning', function() {
+            var m = new ChampionshipMatch({}, {}, ['x', 'y', 'z']);
+            m.a.board.rejected = ['x'];
+            m.a.board.remaining = ['y', 'z'];
+            var report = m.getReport();
+            assert(report instanceof Object);
+            assert.equal(report.winning, 0);
+            assert.equal(report.progress, 1/6);
+            assert(report.players instanceof Array);
+        });
+        it('should say that b is winning', function() {
+            var m = new ChampionshipMatch({}, {}, ['x', 'y', 'z']);
+            m.b.board.rejected = ['x'];
+            m.b.board.remaining = ['y', 'z'];
+            var report = m.getReport();
+            assert(report instanceof Object);
+            assert.equal(report.winning, 1);
+            assert.equal(report.progress, 1/6);
+            assert(report.players instanceof Array);
+        });
+        it('should say that b is winning because of tie and b has next turn', function() {
+            var m = new ChampionshipMatch({}, {}, ['x', 'y', 'z']);
+            var report = m.getReport();
+            assert(report instanceof Object);
+            assert.equal(report.winning, 1);
+            assert.equal(report.progress, 0);
+            assert(report.players instanceof Array);
         });
     });
 });
