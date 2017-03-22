@@ -26,11 +26,18 @@ class ChampionshipMatch
 
     run()
     {
-        if (this.runner) {
+        if (this.runner || this.finished) {
             return; // already running
         }
-        this.runStep();
-        return this;
+        this.nextStep();
+    }
+
+    stop()
+    {
+        if (this.runner) {
+            clearTimeout(this.runner);
+            this.runner = null;
+        }
     }
 
     runStep()
@@ -47,6 +54,8 @@ class ChampionshipMatch
             this.runStep();
             if (!this.finished) {
                 this.nextStep();
+            } else {
+                this.runner = null;
             }
         }, 0);
     }
