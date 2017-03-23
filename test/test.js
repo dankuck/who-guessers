@@ -575,6 +575,27 @@ describe('Championship', function() {
             });
             c.run();
         });
+        it('should run 100 matches, then finish', function(done) {
+            var c = new Championship(
+                [{name:'Loser',class:Loser}], 
+                Whos,
+                100
+            );
+            c.onDone(function(report){
+                assert(report instanceof Object);
+                assert.equal(report.matches, 100);
+                assert(report.results instanceof Array);
+                assert.equal(report.results.length, 100);
+                report.results.map(function(result) {
+                    assert(result instanceof Object);
+                    assert.equal(result.turns, 1);
+                    assert.equal(result.winner, 1);
+                    assert.equal(result.reason, ChampionshipMatch.REASON_INCORRECT_ANSWER);
+                });
+                done();
+            });
+            c.run();
+        });
     });
 });
 
