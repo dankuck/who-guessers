@@ -320,7 +320,7 @@ describe('ChampionshipMatch', function() {
         it('should new up a class', function() {
             class X{}
             var m = new ChampionshipMatch({}, {}, []);
-            var x = m.buildStrategy({class: X});
+            var x = m.buildStrategy(X);
             assert(x instanceof X);
         });
     });
@@ -533,7 +533,7 @@ describe('Championship', function() {
     describe('run and stop, with InfiniteJest', function() {
         it('should run for a while, then stop', function(done) {
             var c = new Championship(
-                [{name:'InfiniteJest',class:InfiniteJest}], 
+                [InfiniteJest], 
                 Whos
             );
             c.run();
@@ -544,7 +544,7 @@ describe('Championship', function() {
         });
         it('should run for a while, receive progress, then stop', function(done) {
             var c = new Championship(
-                [{name:'InfiniteJest',class:InfiniteJest}], 
+                [InfiniteJest],
                 Whos
             );
             var progresses = [];
@@ -560,7 +560,7 @@ describe('Championship', function() {
     describe('run and stop, with Loser', function() {
         it('should run a quick match, then finish', function(done) {
             var c = new Championship(
-                [{name:'Loser',class:Loser}], 
+                [Loser],
                 Whos
             );
             c.onDone(function(report){
@@ -577,7 +577,7 @@ describe('Championship', function() {
         });
         it('should run 100 matches, then finish', function(done) {
             var c = new Championship(
-                [{name:'Loser',class:Loser}], 
+                [Loser], 
                 Whos,
                 100
             );

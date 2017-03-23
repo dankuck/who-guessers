@@ -68,7 +68,7 @@ class ChampionshipMatch
 
     buildStrategy(player)
     {
-        return new player.class();
+        return new player();
     }
 
     switch()
@@ -165,9 +165,10 @@ class ChampionshipMatch
     }
 
     /**
-     * Gives a "blank" view of the other player's info, shaped the same:
-     * The player id is fully accessible;
-     * The board rejects and remaining are countable but undefined;
+     * Gives a "blank" view of the other player's info, shaped the same as 
+     * currentInfo:
+     * The player constructor is fully accessible;
+     * The `board.rejects` and `board.remaining` are countable but undefined;
      * The who is undefined
      */
     otherInfo()

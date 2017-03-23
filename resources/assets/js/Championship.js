@@ -6,9 +6,10 @@ class Championship
 {
 
     /**
-     * @param strategies    array; competitors in {'name':string,'class':class} format
+     * @param strategies    array; constructors for our competitors
      * @param whos          array; objects describing individuals in the game
-     * @param matchCount    int; number of matches each pair should complete
+     * @param matchCount    int; optioanl; number of matches each pair should 
+     *                      complete
      */
     constructor(strategies, whos, matchCount)
     {
