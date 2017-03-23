@@ -123,7 +123,7 @@ class ChampionshipMatch
         this.finished = true;
         var winner;
         var reason;
-        if (answer == this.other.who) {
+        if (answer == this.other.who.name) {
             winner = this.current;
             reason = ChampionshipMatch.REASON_CORRECT_ANSWER;
         } else {
