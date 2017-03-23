@@ -8,6 +8,7 @@ const StrategyIterator = require('../resources/assets/js/StrategyIterator.js');
 const InfiniteJest = require('./support/InfiniteJest.js');
 const Loser = require('./support/Loser.js');
 const Whos = require('../resources/assets/js/Whos.js');
+const SayAnything = require('../resources/assets/js/strategies/SayAnything.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -599,7 +600,29 @@ describe('Championship', function() {
     });
 });
 
-
+describe('SayAnything', function() {
+    describe('Winner every time', function() {
+        it('should pick the only solution that does not have the same name', function() {
+            var whos = Whos.slice(0, 2);
+            var answer = new SayAnything().move({who: whos[0], board: {remaining: whos}}, {}, function(){});
+            assert.equal(answer, whos[1].name);
+        });
+    });
+    describe('Winner half the time', function() {
+        it('should pick one of two solutions that do not have the same name', function() {
+            var whos = Whos.slice(0, 3);
+            var correct = 0;
+            for (var i = 0; i < 100; i++) {
+                var answer = new SayAnything().move({who: whos[0], board: {remaining: whos}}, {}, function(){});
+                if (answer == whos[1].name) {
+                    correct++;
+                }
+            }
+            assert(correct > 0);
+            assert(correct < 100);
+        });
+    });
+});
 
 
 
