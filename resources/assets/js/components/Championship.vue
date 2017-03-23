@@ -11,6 +11,7 @@
 <script>
 import Championship from '../Championship.js';
 import SayAnything from '../strategies/SayAnything.js';
+import Whos from '../Whos.js';
 
 export default {
     data() {
@@ -20,10 +21,24 @@ export default {
     },
     methods: {
         run() {
-            this.championship = new Championship([
-                {name: 'SayAnything', class: SayAnything},
-            ]);
-            this.championship.run();
+            if (this.championship) {
+                this.championship.stop();
+            }
+            this.championship = new Championship(
+                [
+                    SayAnything,
+                ],
+                Whos,
+                100
+            );
+            this.championship
+                .onProgress(report => {
+                    console.log('onProgress', report);
+                })
+                .onDone(results => {
+                    console.log('onDone', results);
+                })
+                .run();
         },
     },
 }
