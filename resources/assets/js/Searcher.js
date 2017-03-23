@@ -1,24 +1,28 @@
 
-class Searcher
+class Conjunction
 {
-    constructor()
+    constructor(start)
     {
-        this.compares = [];
+        this.compares = start || [];
     }
     
-    where()
+    where(...args)
     {
-        if (arguments.length === 3) {
-            var field = arguments[0];
-            var comparison = arguments[1];
-            var value = arguments[2];
-        } else {
-            var field = arguments[0];
+        if (args.length === 3) {
+            var field = args[0];
+            var comparison = args[1];
+            var value = args[2];
+        } else if (args.length === 2) {
+            var field = args[0];
             var comparison = '=';
-            var value = arguments[1];
+            var value = args[1];
             if (value instanceof RegExp) {
                 comparison = 'REGEX';
             }
+        } else if (args.length === 1) {
+            var field = args[0];
+            var comparison = '=';
+            var value = true;
         }
         return this.push(new Compare(field, comparison, value));
     }
@@ -28,26 +32,10 @@ class Searcher
         this.compares.push(compare);
         return this;
     }
-
-    test(object)
-    {
-        return new And(this.compares).test(object);
-    }
 }
-Searcher.where = function (...args) {
-    return new Searcher().where(...args);
-};
-Searcher.push = function (...args) {
-    return new Searcher().push(...args);
-};
 
-class And
+class And extends Conjunction
 {
-    constructor(compares)
-    {
-        this.compares = compares;
-    }
-
     test(object)
     {
         // find the first non-matching value
@@ -56,13 +44,8 @@ class And
     }
 }
 
-class Or
+class Or extends Conjunction
 {
-    constructor(compares)
-    {
-        this.compares = compares;
-    }
-
     test(object)
     {
         // find the first matching value
@@ -105,7 +88,22 @@ class Compare
 }
 Compare.operators = ['=', '<', '<=', '>', '>=', 'REGEX'];
 
-Searcher.Or = Or;
+class Searcher extends And
+{
+}
+Searcher.where = function (...args) {
+    return new Searcher().where(...args);
+};
+Searcher.push = function (...args) {
+    return new Searcher().push(...args);
+};
+Searcher.and = function (...args) {
+    return new And(...args);
+};
+Searcher.or = function (...args) {
+    return new Or(...args);
+};
 Searcher.And = And;
+Searcher.Or = Or;
 
 module.exports = Searcher;
