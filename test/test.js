@@ -1,9 +1,13 @@
-var assert = require('assert');
-var Searcher = require('../resources/assets/js/Searcher.js');
-var Board = require('../resources/assets/js/Board.js');
-var Eventer = require('../resources/assets/js/Eventer.js');
-var ChampionshipMatch = require('../resources/assets/js/ChampionshipMatch.js');
-var StrategyIterator = require('../resources/assets/js/StrategyIterator.js');
+const assert = require('assert');
+const Searcher = require('../resources/assets/js/Searcher.js');
+const Board = require('../resources/assets/js/Board.js');
+const Eventer = require('../resources/assets/js/Eventer.js');
+const Championship = require('../resources/assets/js/Championship.js');
+const ChampionshipMatch = require('../resources/assets/js/ChampionshipMatch.js');
+const StrategyIterator = require('../resources/assets/js/StrategyIterator.js');
+const InfiniteJest = require('./support/InfiniteJest.js');
+const Loser = require('./support/Loser.js');
+const Whos = require('../resources/assets/js/Whos.js');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -456,7 +460,9 @@ describe('StrategyIterator', function() {
         it('builds', function() {
             new StrategyIterator(['a', 'b']);
         });
-        it('#next gives a,a; a,b; b,a; b,b; <null>', function() {
+    });
+    describe('#next', function() {
+        it('should give a,a; a,b; b,a; b,b; <null>', function() {
             var it = new StrategyIterator(['a', 'b']);
             var x, y;
 
@@ -482,7 +488,94 @@ describe('StrategyIterator', function() {
 });
 
 describe('Championship', function() {
-    
+    describe('#instantiate', function() {
+        it('should instantiate', function() {
+            new Championship([]);
+        });
+    });
+    describe('#finish', function() {
+        it('should set finished and fire event', function() {
+            var c = new Championship([]);
+            var ran = 0;
+            c.onDone(function(){ ran++ });
+            c.finish();
+            assert(c.finished);
+            assert.equal(ran, 1);
+        });
+    });
+    describe('#nextCompetitors', function() {
+        it('should get one pair of competitors', function() {
+            var c = new Championship(['a']);
+            var competitors = c.nextCompetitors();
+            assert.equal(competitors[0], 'a');
+            assert.equal(competitors[1], 'a');
+        });
+        it('should get one pair of competitors, then none', function() {
+            var c = new Championship(['a']);
+            var competitors = c.nextCompetitors();
+            assert.equal(competitors[0], 'a');
+            assert.equal(competitors[1], 'a');
+            competitors = c.nextCompetitors();
+            assert(competitors === null);
+        });
+        it('should get one pair of competitors twice, then none', function() {
+            var c = new Championship(['a'], [], 2);
+            var competitors = c.nextCompetitors();
+            assert.equal(competitors[0], 'a');
+            assert.equal(competitors[1], 'a');
+            competitors = c.nextCompetitors();
+            assert.equal(competitors[0], 'a');
+            assert.equal(competitors[1], 'a');
+            competitors = c.nextCompetitors();
+            assert(competitors === null);
+        });
+    });
+    describe('run and stop, with InfiniteJest', function() {
+        it('should run for a while, then stop', function(done) {
+            var c = new Championship(
+                [{name:'InfiniteJest',class:InfiniteJest}], 
+                Whos
+            );
+            c.run();
+            setTimeout(() => {
+                c.stop();
+                done();
+            }, 10);
+        });
+        it('should run for a while, receive progress, then stop', function(done) {
+            var c = new Championship(
+                [{name:'InfiniteJest',class:InfiniteJest}], 
+                Whos
+            );
+            var progresses = [];
+            c.onProgress(function(progress){ progresses.push(progress) });
+            c.run();
+            setTimeout(() => {
+                c.stop();
+                assert(progresses.length > 0);
+                done();
+            }, 10);
+        });
+    });
+    describe('run and stop, with Loser', function() {
+        it('should run a quick match, then finish', function(done) {
+            var c = new Championship(
+                [{name:'Loser',class:Loser}], 
+                Whos
+            );
+            c.onDone(function(report){
+                assert(report instanceof Object);
+                assert.equal(report.matches, 1);
+                assert(report.results instanceof Array);
+                assert(report.results[0] instanceof Object);
+                assert.equal(report.results[0].turns, 1);
+                assert.equal(report.results[0].winner, 1);
+                assert.equal(report.results[0].reason, ChampionshipMatch.REASON_INCORRECT_ANSWER);
+                done();
+            });
+            c.run();
+        });
+    });
 });
 
 

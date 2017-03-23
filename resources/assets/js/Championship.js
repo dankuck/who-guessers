@@ -1,79 +1,62 @@
 const Eventer = require('./Eventer.js');
 const ChampionshipMatch = require('./ChampionshipMatch.js');
+const StrategyIterator = require('./StrategyIterator.js');
 
 class Championship
 {
 
     /**
      * @param strategies    array; competitors in {'name':string,'class':class} format
+     * @param whos          array; objects describing individuals in the game
      * @param matchCount    int; number of matches each pair should complete
      */
-    constructor(strategies, matchCount)
+    constructor(strategies, whos, matchCount)
     {
         this.strategies = strategies;
-        this.matchCount = matchCount;
-        this.matches = 0;
-        this.results = [];
+        this.whos = whos;
+        this.matchCount = matchCount || 1;
 
         this.progressEvents = new Eventer();
         this.doneEvents = new Eventer();
 
+        this.matches = 0;
+        this.results = [];
         this.strategyIterator = new StrategyIterator(this.strategies);
     }
 
     run()
     {
-        if (this.runner || this.finished) {
-            return; // already running
+        if (this.currentMatch) {
+            this.currentMatch.run();
+            return;
         }
-        this.nextStep();
+        var competitors = this.nextCompetitors();
+        if (!competitors) {
+            this.finish();
+            return;
+        }
+        this.currentMatch = new ChampionshipMatch(competitors[0], competitors[1], this.whos)
+            .onProgress((progress) => {
+                this.progressEvents.fire({
+                    matches: this.matches,
+                    results: this.results,
+                    currentMatch: progress,
+                    progress: this.matches / this.matchCount,
+                });
+            })
+            .onDone((result) => {
+                this.currentMatch = null;
+                this.results.push(result);
+                this.run();
+            });
+        this.currentMatch.run();
     }
 
     stop()
     {
-        if (this.runner) {
-            clearTimeout(this.runner);
-            this.runner = null;
+        if (this.currentMatch) {
+            this.currentMatch.stop();
         }
-    }
-
-    nextStep()
-    {
-        this.runner = setTimeout(() => {
-            this.runStep().then(() => {
-                if (!this.finished) {
-                    this.nextStep();
-                } else {
-                    this.runner = null;
-                }
-            });
-        }, 0);
-    }
-
-    runStep()
-    {
-        return new Promise((resolve, error) => {
-            var competitors = this.nextCompetitors();
-            if (!competitors) {
-                this.finish();
-                return;
-            }
-            this.currentMatch = new ChampionshipMatch(competitors[0], competitors[1])
-                .onProgress((progress) => {
-                    this.progressEvents.fire({
-                        matches: this.matches,
-                        results: this.results,
-                        currentMatch: progress,
-                        progress: this.matches / this.matchCount,
-                    });
-                })
-                .onDone((result) => {
-                    this.currentMatch = null;
-                    this.results.push(result);
-                    resolve();
-                })
-                .run();
-        });
     }
 
     nextCompetitors()
@@ -82,7 +65,7 @@ class Championship
         while (!competitors) {
             this.matches++;
             if (this.matches >= this.matchCount) {
-                return; //done
+                return null; //done
             }
             this.strategyIterator = new StrategyIterator(this.strategies);
             competitors = this.strategyIterator.next();

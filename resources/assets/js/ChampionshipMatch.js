@@ -122,16 +122,20 @@ class ChampionshipMatch
     {
         this.finished = true;
         var winner;
+        var reason;
         if (answer == this.other.who) {
             winner = this.current;
+            reason = ChampionshipMatch.REASON_CORRECT_ANSWER;
         } else {
             winner = this.other;
+            reason = ChampionshipMatch.REASON_INCORRECT_ANSWER;
         }
         var result = {
             turns: this.turns,
             winner: (winner === this.a ? 0 : 1),
             players: [this.a.player, this.b.player],
             logs: [this.a.log, this.b.log],
+            reason: reason,
         };
         this.doneEvents.fire(result);
     }
@@ -177,5 +181,8 @@ class ChampionshipMatch
         };
     }
 }
+
+ChampionshipMatch.REASON_CORRECT_ANSWER = 'Winner answered correctly.';
+ChampionshipMatch.REASON_INCORRECT_ANSWER = 'Loser answered incorrectly.';
 
 module.exports = ChampionshipMatch;
