@@ -7,12 +7,18 @@
             </li>
         </ul>
         <button @click="run">{{ championship ? 'Re-do Championship!' : 'Begin Championship!' }}</button>
+        <button @click="addStrategy">+ Strategy</button>
 
         <div v-if="report">
             <div>Matches: {{ report.matches }}
                 <span v-if="report.progress">
                     {{ Math.floor(report.progress * 100) }}%
                 </span>
+                <win-bar
+                    :wins="report.progress || 1"
+                    :losses="0"
+                    :matches="1"
+                ></win-bar>
             </div>
             <div v-for="stats in strategyStats" class="container">
                 {{ stats.name }} 
@@ -35,30 +41,42 @@
                                 :losses="competitor.is_self ? 0 : competitor.losses_against"
                                 :matches="competitor.matches"
                             ></win-bar>
-                            {{ stats.name }} won by answering correctly:
-                            <win-bar
-                                :wins="competitor.win_reasons[REASON_CORRECT_ANSWER]"
-                                :losses="0"
-                                :matches="competitor.matches"
-                            ></win-bar>
-                            {{ stats.name }} won when {{ competitor.is_self ? 'opponent' : competitor.name }} answered incorrectly:
-                            <win-bar
-                                :wins="competitor.win_reasons[REASON_INCORRECT_ANSWER]"
-                                :losses="0"
-                                :matches="competitor.matches"
-                            ></win-bar>
-                            {{ stats.name }} lost by answering incorrectly:
-                            <win-bar
-                                :losses="competitor.loss_reasons[REASON_INCORRECT_ANSWER]"
-                                :wins="0"
-                                :matches="competitor.matches"
-                            ></win-bar>
-                            {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} answered correctly:
-                            <win-bar
-                                :losses="competitor.loss_reasons[REASON_CORRECT_ANSWER]"
-                                :wins="0"
-                                :matches="competitor.matches"
-                            ></win-bar>
+                            <div class="container">
+                                <div class="col-sm-5">
+                                    {{ stats.name }} won by answering correctly:
+                                    <win-bar
+                                        :wins="competitor.win_reasons[REASON_CORRECT_ANSWER]"
+                                        :losses="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                                <div class="col-sm-5">
+                                    {{ stats.name }} won when {{ competitor.is_self ? 'opponent' : competitor.name }} answered incorrectly:
+                                    <win-bar
+                                        :wins="competitor.win_reasons[REASON_INCORRECT_ANSWER]"
+                                        :losses="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                            </div>
+                            <div class="container">
+                                <div class="col-sm-5">
+                                    {{ stats.name }} lost by answering incorrectly:
+                                    <win-bar
+                                        :losses="competitor.loss_reasons[REASON_INCORRECT_ANSWER]"
+                                        :wins="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                                <div class="col-sm-5">
+                                    {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} answered correctly:
+                                    <win-bar
+                                        :losses="competitor.loss_reasons[REASON_CORRECT_ANSWER]"
+                                        :wins="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -78,6 +96,24 @@
                 </tr>
             </table>
         </div>
+        <div id="strategy-editor" class="modal fade" tabindex="-1" role="dialog" v-if="editStrategy">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Edit Strategy</h4>
+              </div>
+              <div class="modal-body">
+                This feature does not yet function.
+                <textarea style="width: 100%; height: 60%"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @click="saveStrategy">Save changes</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
     </div>
 </template>
 
@@ -102,6 +138,7 @@ export default {
             unfoldedStrategy: null,
             REASON_CORRECT_ANSWER: ChampionshipMatch.REASON_CORRECT_ANSWER,
             REASON_INCORRECT_ANSWER: ChampionshipMatch.REASON_INCORRECT_ANSWER,
+            editStrategy: null,
         };
     },
     computed: {
@@ -139,6 +176,7 @@ export default {
             );
             this.championship
                 .onProgress(report => {
+                    this.report = report;
                     console.log('onProgress', report);
                 })
                 .onDone(results => {
@@ -154,6 +192,19 @@ export default {
             } else {
                 this.unfoldedStrategy = name;
             }
+        },
+        addStrategy()
+        {
+            this.editStrategy = "class Custom {\n\n\n}\nmodule.exports = Custom;\n";
+            Vue.nextTick(() => {
+                $(this.$el).find('#strategy-editor').modal('toggle');
+            });
+        },
+        saveStrategy()
+        {
+            Vue.nextTick(() => {
+                this.editStrategy = null;
+            });
         },
     },
 }
