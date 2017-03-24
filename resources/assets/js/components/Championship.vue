@@ -34,7 +34,7 @@
 
 <script>
 import Championship from '../Championship.js';
-import Whos from '../Whos.js';
+import ClassicWhos from '../ClassicWhos.js';
 var strategies = [
     require('../strategies/SayAnything.js'),
 ];
@@ -64,7 +64,7 @@ export default {
             this.report = null;
             this.championship = new Championship(
                 this.chosenStrategies,
-                Whos,
+                ClassicWhos,
                 100
             );
             this.championship

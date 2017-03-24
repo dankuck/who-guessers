@@ -7,8 +7,9 @@ const ChampionshipMatch = require('../resources/assets/js/ChampionshipMatch.js')
 const StrategyIterator = require('../resources/assets/js/StrategyIterator.js');
 const InfiniteJest = require('./support/InfiniteJest.js');
 const Loser = require('./support/Loser.js');
-const Whos = require('../resources/assets/js/Whos.js');
+const ClassicWhos = require('../resources/assets/js/ClassicWhos.js');
 const SayAnything = require('../resources/assets/js/strategies/SayAnything.js');
+const _ = require('lodash');
 
 describe('Searcher.And', function() {
     describe('#constructor', function() {
@@ -371,12 +372,13 @@ describe('ChampionshipMatch', function() {
     describe('#finish', function() {
         it('should finish with player A the winner', function() {
             var m = new ChampionshipMatch({}, {}, []);
-            m.b.who = 'ABC';
+            m.b.who = {name: 'ABC'};
             var result;
             m.onDone(function(doneData) {
                 result = doneData;
             });
             m.finish('ABC');
+            console.log(result);
             assert(m.finished);
             assert.equal(result.turns, 0);
             assert.equal(result.winner, 0);
@@ -535,7 +537,7 @@ describe('Championship', function() {
         it('should run for a while, then stop', function(done) {
             var c = new Championship(
                 [InfiniteJest], 
-                Whos
+                ClassicWhos
             );
             c.run();
             setTimeout(() => {
@@ -546,7 +548,7 @@ describe('Championship', function() {
         it('should run for a while, receive progress, then stop', function(done) {
             var c = new Championship(
                 [InfiniteJest],
-                Whos
+                ClassicWhos
             );
             var progresses = [];
             c.onProgress(function(progress){ progresses.push(progress) });
@@ -562,7 +564,7 @@ describe('Championship', function() {
         it('should run a quick match, then finish', function(done) {
             var c = new Championship(
                 [Loser],
-                Whos
+                ClassicWhos
             );
             c.onDone(function(report){
                 assert(report instanceof Object);
@@ -579,7 +581,7 @@ describe('Championship', function() {
         it('should run 100 matches, then finish', function(done) {
             var c = new Championship(
                 [Loser], 
-                Whos,
+                ClassicWhos,
                 100
             );
             c.onDone(function(report){
@@ -603,14 +605,14 @@ describe('Championship', function() {
 describe('SayAnything', function() {
     describe('Winner every time', function() {
         it('should pick the only solution that does not have the same name', function() {
-            var whos = Whos.slice(0, 2);
+            var whos = ClassicWhos.slice(0, 2);
             var answer = new SayAnything().move({who: whos[0], board: {remaining: whos}}, {}, function(){});
             assert.equal(answer, whos[1].name);
         });
     });
     describe('Winner half the time', function() {
         it('should pick one of two solutions that do not have the same name', function() {
-            var whos = Whos.slice(0, 3);
+            var whos = ClassicWhos.slice(0, 3);
             var correct = 0;
             for (var i = 0; i < 100; i++) {
                 var answer = new SayAnything().move({who: whos[0], board: {remaining: whos}}, {}, function(){});
@@ -620,6 +622,103 @@ describe('SayAnything', function() {
             }
             assert(correct > 0);
             assert(correct < 100);
+        });
+    });
+});
+
+describe('ClassicWhos', function() {
+    describe('Check fields', function() {
+        it('should have only expected fields', function() {
+            var whoKeys = ClassicWhos.map((who) => Object.keys(who));
+            var keys = _(whoKeys).flatten().unique().value();
+            var approved = [ 
+                'bald',
+                'bangs',
+                'beard',
+                'earring_color',
+                'earrings',
+                'eye_color',
+                'gender',
+                'glasses',
+                'hair_color',
+                'hat',
+                'hat_color',
+                'mustache',
+                'name',
+            ];
+            var newProps = _.difference(keys, approved);
+            assert.equal(newProps.length, 0, 'There are new properties in the ClassicWhos array: ' + newProps.join(', ') + '. Maybe you misspelled it, or maybe you just need to add it to the approved list in the test.js');
+        });
+        it('should have expected proportions of fields', function() {
+            var expectedProportions = { 
+                bald: 5,
+                bangs: 4,
+                beard: 4,
+                earring_color: 3,
+                earrings: 3,
+                eye_color: 24,
+                gender: 24,
+                glasses: 5,
+                hair_color: 24,
+                hat: 5,
+                hat_color: 5,
+                mustache: 5,
+                name: 24,
+            };
+            var proportions = {
+                bald: 0,
+                bangs: 0,
+                beard: 0,
+                earring_color: 0,
+                earrings: 0,
+                eye_color: 0,
+                gender: 0,
+                glasses: 0,
+                hair_color: 0,
+                hat: 0,
+                hat_color: 0,
+                mustache: 0,
+                name: 0,
+            };
+            for (var field in expectedProportions) {
+                ClassicWhos.map(who => {
+                    if (who[field]) {
+                        proportions[field]++;
+                    }
+                });
+                assert.equal(proportions[field], expectedProportions[field], 'Unexpected number of individuals with ' + field + ' set. Check your Who list or check the test.js file.');
+            }
+        });
+        it('should have a certain number of ladies', function() {
+            const ladies = ClassicWhos.filter(who => Searcher.where('gender', 'female').test(who));
+            assert.equal(ladies.length, 5, 'Expected exactly 5 ladies, update either ClassicWhos or tests.js');
+        });
+        it('should have a certain number of gentlemen', function() {
+            const ladies = ClassicWhos.filter(who => Searcher.where('gender', 'male').test(who));
+            assert.equal(ladies.length, 19, 'Expected exactly 19 gentlemen, update either ClassicWhos or tests.js');
+        });
+        it('should have a certain number of each hair color', function() {
+            const hairColors = {
+                brown: 0,
+                white: 0,
+                blonde: 0,
+                red: 0,
+                black: 0,
+            };
+            ClassicWhos.map(who => hairColors[who.hair_color]++);
+            assert.equal(hairColors.brown, 4, 'Expected 4 brown haired people, check the ClassicWhos and the test.js file');
+            assert.equal(hairColors.white, 5, 'Expected 5 white haired people, check the ClassicWhos and the test.js file');
+            assert.equal(hairColors.blonde, 5, 'Expected 5 blonde haired people, check the ClassicWhos and the test.js file');
+            assert.equal(hairColors.red , 5, 'Expected 5 red haired people, check the ClassicWhos and the test.js file');
+            assert.equal(hairColors.black , 5, 'Expected 5 black haired people, check the ClassicWhos and the test.js file');
+        });
+        it('should have a certain number of blue-eyed folks', function() {
+            const ladies = ClassicWhos.filter(who => Searcher.where('eye_color', 'blue').test(who));
+            assert.equal(ladies.length, 5, 'Expected exactly 5 blue-eyed people, update either ClassicWhos or tests.js');
+        });
+        it('should have a certain number of brown-eyed folks', function() {
+            const ladies = ClassicWhos.filter(who => Searcher.where('eye_color', 'brown').test(who));
+            assert.equal(ladies.length, 19, 'Expected exactly 19 brown-eyed people, update either ClassicWhos or tests.js');
         });
     });
 });
