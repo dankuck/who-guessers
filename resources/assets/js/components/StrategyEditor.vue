@@ -8,11 +8,10 @@
                 <h4 class="modal-title">Edit Strategy</h4>
               </div>
               <div class="modal-body">
-                This feature does not yet function.
                 <textarea style="width: 100%; height: 60%" v-model="edit"></textarea>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" @click="$emit('cancel')">Cancel</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" data-dismiss="modal" @click="$emit('save', edit)">Save changes</button>
               </div>
             </div><!-- /.modal-content -->
@@ -34,6 +33,9 @@ export default {
         this.edit = this.code;
         Vue.nextTick(() => {
             $(this.$el).find('#strategy-editor').modal('toggle');
+            $(this.$el).find('#strategy-editor').on("hidden.bs.modal", () => {
+                this.$emit('close');
+            });
         });
     },
 }

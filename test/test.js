@@ -574,7 +574,7 @@ describe('Championship', function() {
             );
             c.onDone(function(report){
                 assert(report instanceof Object);
-                assert.equal(report.matches, 1);
+                assert.equal(report.rounds, 1);
                 assert(report.results instanceof Array);
                 assert(report.results[0] instanceof Object);
                 assert.equal(report.results[0].turns, 1);
@@ -592,7 +592,7 @@ describe('Championship', function() {
             );
             c.onDone(function(report){
                 assert(report instanceof Object);
-                assert.equal(report.matches, 100);
+                assert.equal(report.rounds, 100);
                 assert(report.results instanceof Array);
                 assert.equal(report.results.length, 100);
                 report.results.map(function(result) {

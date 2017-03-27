@@ -11,7 +11,7 @@
         <button @click="addStrategy">+ Strategy</button>
 
         <div v-if="report">
-            <div>Matches: {{ report.matches }} / 100
+            <div>Rounds: {{ report.rounds }} / 100
                 <win-bar
                     :wins="typeof report.progress == 'undefined' ? 1 : report.progress"
                     :losses="0"
@@ -23,7 +23,7 @@
                 <win-bar 
                     :wins="stats.wins" 
                     :losses="stats.losses_against_others" 
-                    :matches="100" 
+                    :matches="stats.matches" 
                     @click="toggleUnfold(stats.name)"
                 ></win-bar>
                 <div v-if="unfoldedStrategy === stats.name" class="container">
@@ -34,6 +34,7 @@
                         Against:
                         <div class="container" v-for="competitor in stats.competitors">
                             <div>{{ competitor.name }}</div>
+                            <div>Matches: {{ competitor.matches }}</div>
                             <win-bar
                                 :wins="competitor.wins_against"
                                 :losses="competitor.is_self ? 0 : competitor.losses_against"
@@ -79,26 +80,12 @@
                     </div>
                 </div>
             </div>
-            <table>
-                <tr>
-                    <th>Strategy 1</th>
-                    <th>Strategy 2</th>
-                    <th>Winner</th>
-                    <th>Details</th>
-                </tr>
-                <tr v-for="result in report.results">
-                    <td :style="{'font-weight': result.winner === 0 ? 'bold' : ''}">{{ result.players[0].name }}</td>
-                    <td :style="{'font-weight': result.winner === 1 ? 'bold' : ''}">{{ result.players[1].name }}</td>
-                    <td>{{ result.winner === 0 ? 'Strategy 1' : 'Strategy 2' }}</td>
-                    <td>...</td>
-                </tr>
-            </table>
         </div>
         <strategy-editor 
             v-if="editingStrategy" 
             :code="editingStrategy" 
             @save="saveStrategy"
-            @cancel="cancelStrategyEdit"
+            @close="closeStrategyEdit"
         ></strategy-editor>
     </div>
 </template>
@@ -108,6 +95,7 @@ import Championship from '../Championship.js';
 import ChampionshipMatch from '../ChampionshipMatch.js';
 import ClassicWhos from '../ClassicWhos.js';
 import ChampionshipReportProcessor from '../ChampionshipReportProcessor.js';
+//import Searcher from '../Searcher.js';
 var strategies = [
     require('../strategies/SayAnything.js'),
 ];
@@ -138,8 +126,9 @@ export default {
             if (!this.report) {
                 return null;
             }
-            return Object.values(new ChampionshipReportProcessor(this.report).stats)
-                .sort((a, b) => {
+            var stats = Object.values(new ChampionshipReportProcessor(this.report).stats)
+            if (!this.running) {
+                stats = stats.sort((a, b) => {
                     if (a.wins < b.wins) {
                         return -1;
                     } else if (a.wins > b.wins) {
@@ -148,6 +137,8 @@ export default {
                         return 0;
                     }
                 });
+            }
+            return stats;
         },
     },
     methods: {
@@ -233,12 +224,8 @@ export default {
                 // oh a new one
                 this.chosen.push(strategy.name);
             }
-            Vue.nextTick(() => {
-                this.editingStrategyName = null;
-                this.editingStrategy = null;
-            });
         },
-        cancelStrategyEdit()
+        closeStrategyEdit()
         {
             Vue.nextTick(() => {
                 this.editingStrategyName = null;

@@ -8,19 +8,18 @@ class Championship
     /**
      * @param strategies    array; constructors for our competitors
      * @param whos          array; objects describing individuals in the game
-     * @param matchCount    int; optioanl; number of matches each pair should 
-     *                      complete
+     * @param roundCount    int; optional; number of rounds to complete
      */
-    constructor(strategies, whos, matchCount)
+    constructor(strategies, whos, roundCount)
     {
         this.strategies = strategies;
         this.whos = whos;
-        this.matchCount = matchCount || 1;
+        this.roundCount = roundCount || 1;
 
         this.progressEvents = new Eventer();
         this.doneEvents = new Eventer();
 
-        this.matches = 0;
+        this.rounds = 0;
         this.results = [];
         this.strategyIterator = new StrategyIterator(this.strategies);
     }
@@ -39,10 +38,10 @@ class Championship
         this.currentMatch = new ChampionshipMatch(competitors[0], competitors[1], this.whos)
             .onProgress((progress) => {
                 this.progressEvents.fire({
-                    matches: this.matches,
+                    rounds: this.rounds,
                     results: this.results,
                     currentMatch: progress,
-                    progress: this.matches / this.matchCount,
+                    progress: this.rounds / this.roundCount,
                 });
             })
             .onDone((result) => {
@@ -64,8 +63,8 @@ class Championship
     {
         var competitors = this.strategyIterator.next();
         while (!competitors) {
-            this.matches++;
-            if (this.matches >= this.matchCount) {
+            this.rounds++;
+            if (this.rounds >= this.roundCount) {
                 return null; //done
             }
             this.strategyIterator = new StrategyIterator(this.strategies);
@@ -90,7 +89,7 @@ class Championship
     {
         this.finished = true;
         this.doneEvents.fire({
-            matches: this.matches,
+            rounds: this.rounds,
             results: this.results,
         });
     }
