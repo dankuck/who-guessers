@@ -368,6 +368,12 @@ describe('ChampionshipMatch', function() {
             });
             assert(ran, 1);
         });
+        it('should do nothing with non-data', function() {
+            var m = new ChampionshipMatch({}, {}, ClassicWhos);
+            m.handleMove(null);
+            assert(m.a.board.remaining.length, ClassicWhos.length);
+            assert(m.b.board.remaining.length, ClassicWhos.length);
+        });
     });
     describe('#finish', function() {
         it('should finish with player A the winner', function() {

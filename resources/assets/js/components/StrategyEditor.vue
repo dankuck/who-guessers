@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div id="strategy-editor" class="modal fade" tabindex="-1" role="dialog" v-if="editStrategy">
+        <div id="strategy-editor" class="modal fade" tabindex="-1" role="dialog">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -9,10 +9,10 @@
               </div>
               <div class="modal-body">
                 This feature does not yet function.
-                <textarea style="width: 100%; height: 60%" v-model="code"></textarea>
+                <textarea style="width: 100%; height: 60%" v-model="edit"></textarea>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" @click="$emit('cancel')">Cancel</button>
                 <button type="button" class="btn btn-primary" data-dismiss="modal" @click="$emit('save', edit)">Save changes</button>
               </div>
             </div><!-- /.modal-content -->
@@ -26,7 +26,7 @@ export default {
     props: ['code'],
     data(){
         return {
-            edit: '';
+            edit: '',
         };
     },
     mounted()

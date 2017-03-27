@@ -1,21 +1,19 @@
 <template>
     <div>    
         <h3>Choose the Contestants</h3>
-        <ul>
-            <li v-for="(strategy, name) in strategies">
-                <input type="checkbox" v-model="chosen" :value="name" /> {{ name }}
-            </li>
-        </ul>
-        <button @click="run">{{ championship ? 'Re-do Championship!' : 'Begin Championship!' }}</button>
+        <div v-for="(strategy, name) in strategies">
+            <input type="checkbox" v-model="chosen" :value="name" :id="name" />
+            <label :for="name">{{ name }}</label>
+            <a href="javascript:void(0);"><i v-if="strategyCode[name]" class="fa fa-pencil-square-o" aria-hidden="true" @click="editStrategy(name)"></i></a>
+        </div>
+        <button v-if="!running" @click="run">{{ championship ? 'Re-do Championship!' : 'Begin Championship!' }}</button>
+        <button v-else @click="stop">Stop Championship</button>
         <button @click="addStrategy">+ Strategy</button>
 
         <div v-if="report">
-            <div>Matches: {{ report.matches }}
-                <span v-if="report.progress">
-                    {{ Math.floor(report.progress * 100) }}%
-                </span>
+            <div>Matches: {{ report.matches }} / 100
                 <win-bar
-                    :wins="report.progress || 1"
+                    :wins="typeof report.progress == 'undefined' ? 1 : report.progress"
                     :losses="0"
                     :matches="1"
                 ></win-bar>
@@ -96,7 +94,12 @@
                 </tr>
             </table>
         </div>
-        <strategy-editor v-if="editStrategy" :code="editStrategy" @save="saveStrategy"></strategy-editor>
+        <strategy-editor 
+            v-if="editingStrategy" 
+            :code="editingStrategy" 
+            @save="saveStrategy"
+            @cancel="cancelStrategyEdit"
+        ></strategy-editor>
     </div>
 </template>
 
@@ -115,20 +118,21 @@ export default {
         strategies.map(strategy => strategyMap[strategy.name] = strategy);
         return {
             championship: null,
+            running: false,
             strategies: strategyMap,
             chosen: Object.keys(strategyMap),
             report: null,
             unfoldedStrategy: null,
             REASON_CORRECT_ANSWER: ChampionshipMatch.REASON_CORRECT_ANSWER,
             REASON_INCORRECT_ANSWER: ChampionshipMatch.REASON_INCORRECT_ANSWER,
-            editStrategy: null,
+            editingStrategy: null,
+            editingStrategyName: null,
+            strategyCode: {},
+            reportSetter: null,
+            lastReportSet: null,
         };
     },
     computed: {
-        chosenStrategies()
-        {
-            return this.chosen.map(name => this.strategies[name]);
-        },
         strategyStats()
         {
             if (!this.report) {
@@ -147,26 +151,60 @@ export default {
         },
     },
     methods: {
+        chosenStrategies()
+        {
+            return this.chosen.map(name => this.strategies[name]);
+        },
         run() {
             if (this.championship) {
                 this.championship.stop();
             }
             this.report = null;
             this.championship = new Championship(
-                this.chosenStrategies,
+                this.chosenStrategies(),
                 ClassicWhos,
                 100
             );
+            this.running = true;
             this.championship
                 .onProgress(report => {
-                    this.report = report;
+                    this.setReport(report);
                     console.log('onProgress', report);
                 })
-                .onDone(results => {
-                    this.report = results;
-                    console.log('onDone', results);
+                .onDone(report => {
+                    this.setReport(report);
+                    this.running = false;
+                    console.log('onDone', report);
                 })
                 .run();
+        },
+        setReport(report)
+        {
+            // an attempt to strike a balance between showing new data and keeping things fast
+            if (this.reportSetter) {
+                // we have a new report, ignore the old one
+                clearTimeout(this.reportSetter);
+                this.reportSetter = null;
+            }
+            var setReport = () => {
+                this.report = report;
+                this.lastReportSet = new Date();
+            }   
+            if (!this.lastReportSet || new Date().valueOf() - this.lastReportSet.valueOf() > 250) {
+                // it's been a long time, lets just set it
+                setReport();
+            } else {
+                // we can afford to wait a few milliseconds
+                this.reportSetter = setTimeout(setReport, 100);
+            }
+        },
+        stop()
+        {
+            if (this.championship) {
+                this.championship.stop();
+                this.championship = null;
+            }
+            this.running = false;
         },
         toggleUnfold(name)
         {
@@ -178,13 +216,44 @@ export default {
         },
         addStrategy()
         {
-            this.editStrategy = "class Custom {\n\n    test(){\n    \n}\n\n}\nmodule.exports = Custom;\n";
+            this.editingStrategyName = null;
+            this.editingStrategy = "class Custom\n{\n\n    move(me, other, log){\n        \n    }\n\n}\nmodule.exports = Custom;\n";
         },
-        saveStrategy()
+        editStrategy(name)
+        {
+            this.editingStrategyName = name;
+            this.editingStrategy = this.strategyCode[name];
+        },
+        saveStrategy(code)
+        {
+            var strategy = this.evalStrategy(code);
+            this.strategies[strategy.name] = strategy;
+            this.strategyCode[strategy.name] = code;
+            if (strategy.name !== this.editingStrategyName) {
+                // oh a new one
+                this.chosen.push(strategy.name);
+            }
+            Vue.nextTick(() => {
+                this.editingStrategyName = null;
+                this.editingStrategy = null;
+            });
+        },
+        cancelStrategyEdit()
         {
             Vue.nextTick(() => {
-                this.editStrategy = null;
+                this.editingStrategyName = null;
+                this.editingStrategy = null;
             });
+        },
+        evalStrategy(code)
+        {
+            return (function() {
+                var module = {};
+                var exports = {};
+                module.exports = exports;
+                eval(code);
+                return module.exports;
+            })();
         },
     },
 }

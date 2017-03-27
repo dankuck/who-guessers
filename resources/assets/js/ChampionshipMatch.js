@@ -35,6 +35,7 @@ class ChampionshipMatch
             return; // already running
         }
         this.nextStep();
+        this.progressEvents.fire(this.getReport());
     }
 
     stop()
@@ -88,10 +89,12 @@ class ChampionshipMatch
             this.finish(move);
             return;
         }
-        if (move.test(this.other.who)) {
-            this.current.board.rejectMisses(move);
-        } else {
-            this.current.board.rejectMatches(move);
+        if (move) {
+            if (move.test(this.other.who)) {
+                this.current.board.rejectMisses(move);
+            } else {
+                this.current.board.rejectMatches(move);
+            }
         }
         this.progressEvents.fire(this.getReport());
     }
