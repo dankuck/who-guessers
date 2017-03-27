@@ -21,6 +21,7 @@
             <div v-for="stats in strategyStats" class="container">
                 {{ stats.name }} 
                 <win-bar 
+                    class="unfolder"
                     :wins="stats.wins" 
                     :losses="stats.losses_against_others" 
                     :matches="stats.matches" 
@@ -76,6 +77,24 @@
                                     ></win-bar>
                                 </div>
                             </div>
+                            <div class="container" v-if="competitor.win_reasons[REASON_EXCEPTION_DEFAULT] || competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]">
+                                <div class="col-sm-5">
+                                    {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} threw an exception:
+                                    <win-bar
+                                        :losses="competitor.win_reasons[REASON_EXCEPTION_DEFAULT]"
+                                        :wins="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                                <div class="col-sm-5">
+                                    {{ stats.name }} lost when it threw an exception:
+                                    <win-bar
+                                        :losses="competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]"
+                                        :wins="0"
+                                        :matches="competitor.matches"
+                                    ></win-bar>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -95,15 +114,13 @@ import Championship from '../Championship.js';
 import ChampionshipMatch from '../ChampionshipMatch.js';
 import ClassicWhos from '../ClassicWhos.js';
 import ChampionshipReportProcessor from '../ChampionshipReportProcessor.js';
-//import Searcher from '../Searcher.js';
-var strategies = [
-    require('../strategies/SayAnything.js'),
-];
+import StrategyBuilder from '../StrategyBuilder.js';
+import roster from '../strategies/roster.js';
 
 export default {
     data() {
         var strategyMap = {};
-        strategies.map(strategy => strategyMap[strategy.name] = strategy);
+        roster.map(strategy => strategyMap[strategy.name] = strategy);
         return {
             championship: null,
             running: false,
@@ -113,6 +130,7 @@ export default {
             unfoldedStrategy: null,
             REASON_CORRECT_ANSWER: ChampionshipMatch.REASON_CORRECT_ANSWER,
             REASON_INCORRECT_ANSWER: ChampionshipMatch.REASON_INCORRECT_ANSWER,
+            REASON_EXCEPTION_DEFAULT: ChampionshipMatch.REASON_EXCEPTION_DEFAULT,
             editingStrategy: null,
             editingStrategyName: null,
             strategyCode: {},
@@ -215,9 +233,8 @@ export default {
             this.editingStrategyName = name;
             this.editingStrategy = this.strategyCode[name];
         },
-        saveStrategy(code)
+        saveStrategy(strategy, code)
         {
-            var strategy = this.evalStrategy(code);
             this.strategies[strategy.name] = strategy;
             this.strategyCode[strategy.name] = code;
             if (strategy.name !== this.editingStrategyName) {
@@ -232,16 +249,12 @@ export default {
                 this.editingStrategy = null;
             });
         },
-        evalStrategy(code)
-        {
-            return (function() {
-                var module = {};
-                var exports = {};
-                module.exports = exports;
-                eval(code);
-                return module.exports;
-            })();
-        },
     },
 }
 </script>
+
+<style>
+.unfolder {
+    cursor: pointer;
+}
+</style>

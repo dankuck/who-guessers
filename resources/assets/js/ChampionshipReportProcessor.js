@@ -51,6 +51,7 @@ class ChampionshipReportProcessor
             var reasons = {};
             reasons[ChampionshipMatch.REASON_CORRECT_ANSWER] = 0;
             reasons[ChampionshipMatch.REASON_INCORRECT_ANSWER] = 0;
+            reasons[ChampionshipMatch.REASON_EXCEPTION_DEFAULT] = 0;
             return reasons;
         };
         if (!player.competitors[name]) {

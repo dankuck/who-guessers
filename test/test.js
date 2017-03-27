@@ -298,6 +298,13 @@ describe('ChampionshipMatch', function() {
                 done();
             }, 20);
         });
+        it('should runStep until it quits for too many turns', function(done) {
+            var m = new ChampionshipMatch(InfiniteJest, InfiniteJest, [], 10);
+            m.run().onError(function() {
+                assert.equal(m.turns, 11);
+                done();
+            });
+        });
     });
     describe('#runStep', function() {
         it('should get a move and handle it', function() {
@@ -316,6 +323,20 @@ describe('ChampionshipMatch', function() {
             };
             m.runStep();
             assert.equal(caughtMove, 'XXXX');
+        });
+        it('should end match on exceptions', function() {
+            var caughtMove;
+            var m = new ChampionshipMatch({}, {}, []);
+            m.otherInfo = function(){};
+            m.buildStrategy = function() {
+                return {
+                    move() {
+                        throw new Error();
+                    }
+                };
+            };
+            m.runStep();
+            assert(m.finished);
         });
     });
     describe('#buildStrategy', function() {
@@ -384,7 +405,6 @@ describe('ChampionshipMatch', function() {
                 result = doneData;
             });
             m.finish('ABC');
-            console.log(result);
             assert(m.finished);
             assert.equal(result.turns, 0);
             assert.equal(result.winner, 0);

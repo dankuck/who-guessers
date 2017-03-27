@@ -1,27 +1,29 @@
 {
-  "name": "glitcher",
+  "name": "who-guesser",
   "version": "1.0.0",
-  "description": "Make glitches in photos",
+  "description": "A Guess Who championship for bots",
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dankuck/glitcher.git"
+    "url": "git+https://github.com/dankuck/who-guessers.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dankuck/glitcher/issues"
+    "url": "https://github.com/dankuck/who-guessers/issues"
   },
-  "homepage": "https://github.com/dankuck/glitcher#readme",
+  "homepage": "https://github.com/dankuck/who-guessers#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
+    "html-loader": "^0.4.5",
     "laravel-elixir": "^6.0.0-15",
     "laravel-elixir-vue-2": "^0.3.0",
     "laravel-elixir-webpack-official": "^1.0.10",
     "lodash": "^4.16.2",
+    "markdown-loader": "^2.0.0",
     "mocha": "^3.2.0",
     "vue": "^2.1.*",
     "vue-resource": "^1.0.3"

@@ -5,7 +5,7 @@ const Board = require('./Board.js');
 class ChampionshipMatch
 {
 
-    constructor(playerA, playerB, whos)
+    constructor(playerA, playerB, whos, maxTurns)
     {
         this.deckSize = whos.length;
         var deck = _.shuffle(_.cloneDeep(whos));
@@ -24,9 +24,11 @@ class ChampionshipMatch
         this.current = this.a;
         this.other = this.b;
         this.doneEvents = new Eventer();
+        this.errorEvents = new Eventer();
         this.progressEvents = new Eventer();
         this.finished = false;
         this.turns = 0;
+        this.maxTurns = maxTurns || 100;
     }
 
     run()
@@ -36,6 +38,7 @@ class ChampionshipMatch
         }
         this.nextStep();
         this.progressEvents.fire(this.getReport());
+        return this;
     }
 
     stop()
@@ -48,11 +51,21 @@ class ChampionshipMatch
 
     runStep()
     {
+        if (this.turns > this.maxTurns) {
+            this.errorOut('Strategies took more than ' + this.maxTurns + ' turns.');
+            return;
+        }
         this.turns++;
-        var strategy = this.buildStrategy(this.current.player);
-        var move = strategy.move(_.cloneDeep(this.currentInfo()), _.cloneDeep(this.otherInfo()), (text) => this.current.log.push(text));
-        this.handleMove(move);
-        this.switch();
+        var log = (text) => this.current.log.push(text);
+        try {
+            var strategy = this.buildStrategy(this.current.player);
+            var move = strategy.move(_.cloneDeep(this.currentInfo()), _.cloneDeep(this.otherInfo()), log);
+            this.handleMove(move);
+            this.switch();
+        } catch (e) {
+            log(e.stack);
+            this.finalizeFinish(this.other, ChampionshipMatch.REASON_EXCEPTION_DEFAULT);
+        }
     }
 
     nextStep()
@@ -123,16 +136,16 @@ class ChampionshipMatch
 
     finish(answer)
     {
-        this.finished = true;
-        var winner;
-        var reason;
         if (answer == this.other.who.name) {
-            winner = this.current;
-            reason = ChampionshipMatch.REASON_CORRECT_ANSWER;
+            this.finalizeFinish(this.current, ChampionshipMatch.REASON_CORRECT_ANSWER);
         } else {
-            winner = this.other;
-            reason = ChampionshipMatch.REASON_INCORRECT_ANSWER;
+            this.finalizeFinish(this.other, ChampionshipMatch.REASON_INCORRECT_ANSWER);
         }
+    }
+
+    finalizeFinish(winner, reason)
+    {
+        this.finished = true;
         var result = {
             turns: this.turns,
             winner: (winner === this.a ? 0 : 1),
@@ -143,9 +156,21 @@ class ChampionshipMatch
         this.doneEvents.fire(result);
     }
 
+    errorOut(err)
+    {
+        this.finished = true;
+        this.errorEvents.fire(new Error(err));
+    }
+
     onDone(closure)
     {
         this.doneEvents.on(closure);
+        return this;
+    }
+
+    onError(closure)
+    {
+        this.errorEvents.on(closure);
         return this;
     }
 
@@ -188,5 +213,6 @@ class ChampionshipMatch
 
 ChampionshipMatch.REASON_CORRECT_ANSWER = 'Winner answered correctly.';
 ChampionshipMatch.REASON_INCORRECT_ANSWER = 'Loser answered incorrectly.';
+ChampionshipMatch.REASON_EXCEPTION_DEFAULT = 'Loser threw an exception.';
 
 module.exports = ChampionshipMatch;

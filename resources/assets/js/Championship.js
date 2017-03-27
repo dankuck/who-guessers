@@ -21,6 +21,7 @@ class Championship
 
         this.rounds = 0;
         this.results = [];
+        this.errors = [];
         this.strategyIterator = new StrategyIterator(this.strategies);
     }
 
@@ -40,6 +41,7 @@ class Championship
                 this.progressEvents.fire({
                     rounds: this.rounds,
                     results: this.results,
+                    errors: this.errors,
                     currentMatch: progress,
                     progress: this.rounds / this.roundCount,
                 });
@@ -47,6 +49,15 @@ class Championship
             .onDone((result) => {
                 this.currentMatch = null;
                 this.results.push(result);
+                this.run();
+            })
+            .onError((err) => {
+                // there was an error that couldn't be blamed on anyone in particular
+                this.currentMatch = null;
+                this.errors.push({
+                    error: err,
+                    competitors: competitors,
+                });
                 this.run();
             });
         this.currentMatch.run();
