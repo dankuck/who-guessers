@@ -16,7 +16,8 @@
                         <option v-for="(log, i) in searchedLogs" :value="i">{{ i + ': ' + log[0] }}</option>
                     </select>
                 </div>
-                <pre>{{ logs[viewing].join("\n") }}</pre>
+                <pre v-if="logs[viewing]">{{ logs[viewing].join("\n") }}</pre>
+                <div v-else>Please select a log, if any are listed.</div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

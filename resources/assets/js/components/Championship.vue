@@ -1,14 +1,20 @@
 <template>
-    <div>    
-        <h3>Choose the Contestants</h3>
-        <div v-for="(strategy, name) in strategies">
-            <input type="checkbox" v-model="chosen" :value="name" :id="name" />
-            <label :for="name">{{ name }}</label>
-            <a href="javascript:void(0);"><i v-if="strategyCode[name]" class="fa fa-pencil-square-o" aria-hidden="true" @click="editStrategy(name)"></i></a>
+    <div>   
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Choose the Strategies to Compete</h3>
+            </div>
+            <div class="panel-body"> 
+                <div v-for="(strategy, name) in strategies">
+                    <input type="checkbox" v-model="chosen" :value="name" :id="name" />
+                    <label :for="name">{{ name }}</label>
+                    <a href="javascript:void(0);" @click="editStrategy(name)"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                </div>
+                <button v-if="!running" @click="run" type="button" class="btn btn-default btn-lg">{{ championship ? 'Re-do Championship!' : 'Begin Championship!' }}</button>
+                <button v-else @click="stop" type="button" class="btn btn-default btn-lg">Stop Championship</button>
+                <button @click="addStrategy" type="button" class="btn btn-default btn-lg">New Strategy</button>
+            </div>
         </div>
-        <button v-if="!running" @click="run">{{ championship ? 'Re-do Championship!' : 'Begin Championship!' }}</button>
-        <button v-else @click="stop">Stop Championship</button>
-        <button @click="addStrategy">+ Strategy</button>
 
         <div v-if="report">
             <div>Rounds: {{ report.rounds }} / 100
@@ -28,79 +34,95 @@
                     @click="toggleUnfold(stats.name)"
                 ></win-bar>
                 <div v-if="unfoldedStrategy === stats.name" class="container">
-                    <div>Matches: {{ stats.matches }} / 100</div>
-                    <div>Wins: {{ stats.wins }} / {{ stats.matches}}</div>
-                    <div>Losses: {{ stats.losses_against_others }} / {{ stats.matches }}</div>
-                    <div>
-                        Against:
-                        <div class="container" v-for="competitor in stats.competitors">
-                            <div>{{ competitor.name }}</div>
-                            <div>Matches: {{ competitor.matches }}</div>
-                            <win-bar
-                                :wins="competitor.wins_against"
-                                :losses="competitor.is_self ? 0 : competitor.losses_against"
-                                :matches="competitor.matches"
-                            ></win-bar>
-                            <div class="container">
-                                <div class="col-sm-5">
-                                    {{ stats.name }} won by answering correctly:
-                                    <win-bar
-                                        class="pointer"
-                                        :wins="competitor.win_reasons[REASON_CORRECT_ANSWER]"
-                                        :losses="0"
-                                        :matches="competitor.matches"
-                                        @click="showLogs(stats.name + ' won by answering correctly', competitor.win_logs[REASON_CORRECT_ANSWER])"
-                                    ></win-bar>
-                                </div>
-                                <div class="col-sm-5">
-                                    {{ stats.name }} won when {{ competitor.is_self ? 'opponent' : competitor.name }} answered incorrectly:
-                                    <win-bar
-                                        class="pointer"
-                                        :wins="competitor.win_reasons[REASON_INCORRECT_ANSWER]"
-                                        :losses="0"
-                                        :matches="competitor.matches"
-                                        @click="showLogs(stats.name + ' won when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered incorrectly', competitor.win_logs[REASON_INCORRECT_ANSWER])"
-                                    ></win-bar>
-                                </div>
+                    <div class="row">
+                        <ul class="list-group col-sm-2">
+                            <li class="list-group-item">
+                                <span class="badge">{{ stats.matches }}</span>
+                                Matches
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">{{ stats.wins }}</span>
+                                Wins
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">{{ stats.losses_against_others }}</span>
+                                Losses
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row">
+                        <div class="panel panel-default" v-for="competitor in stats.competitors">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Against: {{ competitor.name }}</h3>
                             </div>
-                            <div class="container">
-                                <div class="col-sm-5">
-                                    {{ stats.name }} lost by answering incorrectly:
-                                    <win-bar
-                                        class="pointer"
-                                        :losses="competitor.loss_reasons[REASON_INCORRECT_ANSWER]"
-                                        :wins="0"
-                                        :matches="competitor.matches"
-                                        @click="showLogs(stats.name + ' lost by answering incorrectly', competitor.loss_logs[REASON_INCORRECT_ANSWER])"
-                                    ></win-bar>
+                            <div class="panel-body">
+                                <div>Matches: {{ competitor.matches }}</div>
+                                <win-bar
+                                    :wins="competitor.wins_against"
+                                    :losses="competitor.is_self ? 0 : competitor.losses_against"
+                                    :matches="competitor.matches"
+                                ></win-bar>
+                                <div class="container">
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} won by answering correctly:
+                                        <win-bar
+                                            class="pointer"
+                                            :wins="competitor.win_reasons[REASON_CORRECT_ANSWER]"
+                                            :losses="0"
+                                            :matches="competitor.matches"
+                                            @click="showLogs(stats.name + ' won by answering correctly', competitor.win_logs[REASON_CORRECT_ANSWER])"
+                                        ></win-bar>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} won when {{ competitor.is_self ? 'opponent' : competitor.name }} answered incorrectly:
+                                        <win-bar
+                                            class="pointer"
+                                            :wins="competitor.win_reasons[REASON_INCORRECT_ANSWER]"
+                                            :losses="0"
+                                            :matches="competitor.matches"
+                                            @click="showLogs(stats.name + ' won when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered incorrectly', competitor.win_logs[REASON_INCORRECT_ANSWER])"
+                                        ></win-bar>
+                                    </div>
                                 </div>
-                                <div class="col-sm-5">
-                                    {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} answered correctly:
-                                    <win-bar
-                                        class="pointer"
-                                        :losses="competitor.loss_reasons[REASON_CORRECT_ANSWER]"
-                                        :wins="0"
-                                        :matches="competitor.matches"
-                                        @click="showLogs(stats.name + ' ;pst when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered correctly', competitor.loss_logs[REASON_CORRECT_ANSWER])"
-                                    ></win-bar>
+                                <div class="container">
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} lost by answering incorrectly:
+                                        <win-bar
+                                            class="pointer"
+                                            :losses="competitor.loss_reasons[REASON_INCORRECT_ANSWER]"
+                                            :wins="0"
+                                            :matches="competitor.matches"
+                                            @click="showLogs(stats.name + ' lost by answering incorrectly', competitor.loss_logs[REASON_INCORRECT_ANSWER])"
+                                        ></win-bar>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} answered correctly:
+                                        <win-bar
+                                            class="pointer"
+                                            :losses="competitor.loss_reasons[REASON_CORRECT_ANSWER]"
+                                            :wins="0"
+                                            :matches="competitor.matches"
+                                            @click="showLogs(stats.name + ' lost when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered correctly', competitor.loss_logs[REASON_CORRECT_ANSWER])"
+                                        ></win-bar>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="container" v-if="competitor.win_reasons[REASON_EXCEPTION_DEFAULT] || competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]">
-                                <div class="col-sm-5">
-                                    {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} threw an exception:
-                                    <win-bar
-                                        :losses="competitor.win_reasons[REASON_EXCEPTION_DEFAULT]"
-                                        :wins="0"
-                                        :matches="competitor.matches"
-                                    ></win-bar>
-                                </div>
-                                <div class="col-sm-5">
-                                    {{ stats.name }} lost when it threw an exception:
-                                    <win-bar
-                                        :losses="competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]"
-                                        :wins="0"
-                                        :matches="competitor.matches"
-                                    ></win-bar>
+                                <div class="container" v-if="competitor.win_reasons[REASON_EXCEPTION_DEFAULT] || competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]">
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} threw an exception:
+                                        <win-bar
+                                            :losses="competitor.win_reasons[REASON_EXCEPTION_DEFAULT]"
+                                            :wins="0"
+                                            :matches="competitor.matches"
+                                        ></win-bar>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        {{ stats.name }} lost when it threw an exception:
+                                        <win-bar
+                                            :losses="competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]"
+                                            :wins="0"
+                                            :matches="competitor.matches"
+                                        ></win-bar>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -130,6 +152,22 @@ import ClassicWhos from '../ClassicWhos.js';
 import ChampionshipReportProcessor from '../ChampionshipReportProcessor.js';
 import StrategyBuilder from '../StrategyBuilder.js';
 import roster from '../strategies/roster.js';
+
+const defaultEditingStrategy = `
+const _ = require('lodash');
+const Searcher = require('../Searcher.js');
+
+class Custom
+{
+  move(me, other, log)
+  {
+    
+  }
+}
+
+module.exports = Custom;
+
+`;
 
 export default {
     data() {
@@ -194,12 +232,10 @@ export default {
             this.championship
                 .onProgress(report => {
                     this.setReport(report);
-                    console.log('onProgress', report);
                 })
                 .onDone(report => {
                     this.setReport(report);
                     this.running = false;
-                    console.log('onDone', report);
                 })
                 .run();
         },
@@ -242,12 +278,43 @@ export default {
         addStrategy()
         {
             this.editingStrategyName = null;
-            this.editingStrategy = "class Custom\n{\n\n    move(me, other, log){\n        \n    }\n\n}\nmodule.exports = Custom;\n";
+            this.editingStrategy = defaultEditingStrategy;
         },
         editStrategy(name)
         {
-            this.editingStrategyName = name;
-            this.editingStrategy = this.strategyCode[name];
+            if (this.strategyCode[name]) {
+                this.editingStrategyName = name;
+                this.editingStrategy = this.strategyCode[name];
+            } else {
+                this.downloadStrategy(name)
+                    .then(() => {
+                        this.editingStrategyName = name;
+                        this.editingStrategy = this.strategyCode[name];
+                    })
+                    .catch(error => {
+                        alert("Unable to read file: " + error);
+                    });
+            }
+        },
+        downloadStrategy(name)
+        {
+            return this.$http
+                .get('resources/assets/js/strategies/' + name + '.js')
+                .then(response => {
+                    return new Promise((resolve, error) => {
+                        var f = new FileReader();
+                        f.onload = () => {
+                            resolve(f.result);
+                        };
+                        f.onerror = () => {
+                            error(f.error);
+                        };
+                        f.readAsText(response.body);
+                    });
+                })
+                .then(code => {
+                    this.strategyCode[name] = code;
+                });
         },
         saveStrategy(strategy, code)
         {
