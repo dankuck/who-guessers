@@ -99,4 +99,4 @@ Then submit a pull request back to us.
 
 Your class should not save any information anywhere for use in a later turn. That would be contradict the game notion that the board is all the memory you have.
 
-To assist with this, your class is re-instantiated on each turn and all parameters given to it are re-copied. The effect is that you can make any changes to the parameters or the `this` object you like and trust that they will be reset for next time.
+To assist with this, your class is re-instantiated on each turn and all parameters given to it are re-copied. The effect is that you can make any changes you like to the parameters or the `this` object and trust that they will be reset for next time.
