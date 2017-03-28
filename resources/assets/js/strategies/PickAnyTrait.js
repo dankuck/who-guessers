@@ -1,6 +1,17 @@
 const _ = require('lodash');
 const Searcher = require('../Searcher.js');
 
+/**
+ * Chooses a field randomly from all the remaining characters,
+ * then chooses a value randomly and returns a Searcher for
+ * that field and value.
+ *
+ * But if there's only one character left, it just returns 
+ * their name.
+ *
+ * This strategy never guesses wrong, but it might lose if it
+ * takes too long.
+ */
 class PickAnyTrait
 {
 
@@ -17,5 +28,5 @@ class PickAnyTrait
     }
 
 }
-module.exports = PickAnyTrait;
 
+module.exports = PickAnyTrait;
