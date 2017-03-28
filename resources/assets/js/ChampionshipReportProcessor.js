@@ -20,6 +20,8 @@ class ChampionshipReportProcessor
             losersWinnerInfo.losses_against++;
             winnersLoserInfo.win_reasons[result.reason]++;
             losersWinnerInfo.loss_reasons[result.reason]++;
+            winnersLoserInfo.win_logs[result.reason].push(result.logs[winner]);
+            losersWinnerInfo.loss_logs[result.reason].push(result.logs[loser]);
             if (players[0] !== players[1]) {
                 players[loser].matches++;
                 players[winner].wins_against_others++;
@@ -54,6 +56,13 @@ class ChampionshipReportProcessor
             reasons[ChampionshipMatch.REASON_EXCEPTION_DEFAULT] = 0;
             return reasons;
         };
+        function buildLogs() {
+            var logs = {};
+            logs[ChampionshipMatch.REASON_CORRECT_ANSWER] = [];
+            logs[ChampionshipMatch.REASON_INCORRECT_ANSWER] = [];
+            logs[ChampionshipMatch.REASON_EXCEPTION_DEFAULT] = [];
+            return logs;
+        };
         if (!player.competitors[name]) {
             player.competitors[name] = {
                 name: name,
@@ -63,6 +72,8 @@ class ChampionshipReportProcessor
                 is_self: (player.name === name),
                 win_reasons: buildReasons(),
                 loss_reasons: buildReasons(),
+                win_logs: buildLogs(),
+                loss_logs: buildLogs(),
             };
         }
         return player.competitors[name];

@@ -146,6 +146,8 @@ class ChampionshipMatch
     finalizeFinish(winner, reason)
     {
         this.finished = true;
+        this.a.log.push('ANSWER: ' + this.b.who.name);
+        this.b.log.push('ANSWER: ' + this.a.who.name);
         var result = {
             turns: this.turns,
             winner: (winner === this.a ? 0 : 1),

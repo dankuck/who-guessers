@@ -21,7 +21,7 @@
             <div v-for="stats in strategyStats" class="container">
                 {{ stats.name }} 
                 <win-bar 
-                    class="unfolder"
+                    class="pointer"
                     :wins="stats.wins" 
                     :losses="stats.losses_against_others" 
                     :matches="stats.matches" 
@@ -45,17 +45,21 @@
                                 <div class="col-sm-5">
                                     {{ stats.name }} won by answering correctly:
                                     <win-bar
+                                        class="pointer"
                                         :wins="competitor.win_reasons[REASON_CORRECT_ANSWER]"
                                         :losses="0"
                                         :matches="competitor.matches"
+                                        @click="showLogs(stats.name + ' won by answering correctly', competitor.win_logs[REASON_CORRECT_ANSWER])"
                                     ></win-bar>
                                 </div>
                                 <div class="col-sm-5">
                                     {{ stats.name }} won when {{ competitor.is_self ? 'opponent' : competitor.name }} answered incorrectly:
                                     <win-bar
+                                        class="pointer"
                                         :wins="competitor.win_reasons[REASON_INCORRECT_ANSWER]"
                                         :losses="0"
                                         :matches="competitor.matches"
+                                        @click="showLogs(stats.name + ' won when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered incorrectly', competitor.win_logs[REASON_INCORRECT_ANSWER])"
                                     ></win-bar>
                                 </div>
                             </div>
@@ -63,17 +67,21 @@
                                 <div class="col-sm-5">
                                     {{ stats.name }} lost by answering incorrectly:
                                     <win-bar
+                                        class="pointer"
                                         :losses="competitor.loss_reasons[REASON_INCORRECT_ANSWER]"
                                         :wins="0"
                                         :matches="competitor.matches"
+                                        @click="showLogs(stats.name + ' lost by answering incorrectly', competitor.loss_logs[REASON_INCORRECT_ANSWER])"
                                     ></win-bar>
                                 </div>
                                 <div class="col-sm-5">
                                     {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} answered correctly:
                                     <win-bar
+                                        class="pointer"
                                         :losses="competitor.loss_reasons[REASON_CORRECT_ANSWER]"
                                         :wins="0"
                                         :matches="competitor.matches"
+                                        @click="showLogs(stats.name + ' ;pst when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered correctly', competitor.loss_logs[REASON_CORRECT_ANSWER])"
                                     ></win-bar>
                                 </div>
                             </div>
@@ -106,6 +114,12 @@
             @save="saveStrategy"
             @close="closeStrategyEdit"
         ></strategy-editor>
+        <logs-viewer
+            v-if="viewingLogs"
+            :logs="viewingLogs"
+            :title="viewingLogsTitle"
+            @close="closeLogViewer"
+        ></logs-viewer>
     </div>
 </template>
 
@@ -136,6 +150,8 @@ export default {
             strategyCode: {},
             reportSetter: null,
             lastReportSet: null,
+            viewingLogs: null,
+            viewingLogsTitle: '',
         };
     },
     computed: {
@@ -249,12 +265,23 @@ export default {
                 this.editingStrategy = null;
             });
         },
+        showLogs(title, logs)
+        {
+            this.viewingLogsTitle = title;
+            this.viewingLogs = logs;
+        },
+        closeLogViewer()
+        {
+            Vue.nextTick(() => {
+                this.viewingLogs = null;
+            });
+        },
     },
 }
 </script>
 
 <style>
-.unfolder {
+.pointer {
     cursor: pointer;
 }
 </style>
