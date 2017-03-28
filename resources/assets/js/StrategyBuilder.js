@@ -1,4 +1,5 @@
 const Searcher = require('./Searcher.js');
+const _ = require('lodash');
 
 class StrategyBuilder
 {
