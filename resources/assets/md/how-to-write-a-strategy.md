@@ -94,3 +94,9 @@ When you write a strategy it just lives in your browser. A page refresh can dest
 3. Add a `require` call in the `resources/assets/js/strategies/roster.js` file.
 
 Then submit a pull request back to us.
+
+### No Memory Rule
+
+Your class should not save any information anywhere for use in a later turn. That would be contradict the game notion that the board is all the memory you have.
+
+To assist with this, your class is re-instantiated on each turn and all parameters given to it are re-copied. The effect is that you can make any changes to the parameters or the `this` object you like and trust that they will be reset for next time.
