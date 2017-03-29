@@ -53,10 +53,11 @@
                     <div class="row">
                         <div class="panel panel-default" v-for="competitor in stats.competitors">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Against: {{ competitor.name }}</h3>
+                                <h3 class="panel-title">{{ stats.name }} vs. {{ competitor.name }}</h3>
                             </div>
                             <div class="panel-body">
-                                <div>{{ strategies[competitor.name].description }}</div>
+                                <div>{{ strategies[stats.name].description }}</div>
+                                <div>vs. {{ strategies[competitor.name].description }}</div>
                                 <div>Matches: {{ competitor.matches }}</div>
                                 <win-bar
                                     :wins="competitor.wins_against"
