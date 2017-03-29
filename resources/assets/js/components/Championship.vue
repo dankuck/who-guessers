@@ -199,9 +199,9 @@ export default {
             if (!this.running) {
                 stats = stats.sort((a, b) => {
                     if (a.wins < b.wins) {
-                        return -1;
-                    } else if (a.wins > b.wins) {
                         return 1;
+                    } else if (a.wins > b.wins) {
+                        return -1;
                     } else {
                         return 0;
                     }
