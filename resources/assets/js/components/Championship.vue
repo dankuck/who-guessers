@@ -25,7 +25,7 @@
                 ></win-bar>
             </div>
             <div v-for="stats in strategyStats" class="container">
-                {{ stats.name }} 
+                {{ stats.name }} | {{ strategies[stats.name].description }}
                 <win-bar 
                     class="pointer"
                     :wins="stats.wins" 
@@ -56,6 +56,7 @@
                                 <h3 class="panel-title">Against: {{ competitor.name }}</h3>
                             </div>
                             <div class="panel-body">
+                                <div>{{ strategies[competitor.name].description }}</div>
                                 <div>Matches: {{ competitor.matches }}</div>
                                 <win-bar
                                     :wins="competitor.wins_against"
@@ -106,21 +107,15 @@
                                         ></win-bar>
                                     </div>
                                 </div>
-                                <div class="container" v-if="competitor.win_reasons[REASON_EXCEPTION_DEFAULT] || competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]">
-                                    <div class="col-sm-5">
-                                        {{ stats.name }} lost when {{ competitor.is_self ? 'opponent' : competitor.name }} threw an exception:
-                                        <win-bar
-                                            :losses="competitor.win_reasons[REASON_EXCEPTION_DEFAULT]"
-                                            :wins="0"
-                                            :matches="competitor.matches"
-                                        ></win-bar>
-                                    </div>
+                                <div class="container" v-if="competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]">
                                     <div class="col-sm-5">
                                         {{ stats.name }} lost when it threw an exception:
                                         <win-bar
+                                            class="pointer"
                                             :losses="competitor.loss_reasons[REASON_EXCEPTION_DEFAULT]"
                                             :wins="0"
                                             :matches="competitor.matches"
+                                            @click="showLogs(stats.name + ' lost when it threw an exception', competitor.loss_logs[REASON_EXCEPTION_DEFAULT])"
                                         ></win-bar>
                                     </div>
                                 </div>
@@ -165,8 +160,9 @@ class Custom
   }
 }
 
-module.exports = Custom;
+Custom.description = 'Explain your strategy briefly';
 
+module.exports = Custom;
 `;
 
 export default {

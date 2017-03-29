@@ -19,4 +19,6 @@ class SayAnything
 
 }
 
+SayAnything.description = "Choose any name";
+
 module.exports = SayAnything;

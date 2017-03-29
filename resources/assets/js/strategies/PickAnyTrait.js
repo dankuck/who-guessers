@@ -43,4 +43,6 @@ class PickAnyTrait
 
 }
 
+PickAnyTrait.description = "Search character traits at random";
+
 module.exports = PickAnyTrait;
