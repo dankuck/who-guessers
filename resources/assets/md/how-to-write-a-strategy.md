@@ -79,6 +79,14 @@ Match `Who` objects that have (gender == 'female' OR eye_color == 'brown') AND e
 Searcher.or([Searcher.where('gender', 'female'), Searcher.where('eye_color', 'brown')]).and('earrings', true)
 ```
 
+You can find out if an object matches a `Searcher` using `test`.
+```
+var who = {
+    bald: true,
+};
+Searcher.where('bald', true).test(who); // yields true
+```
+
 ### Finishing Move
 
 When you return a string, the match ends. If you returned the name of the opponent's `Who`, then your strategy wins.
