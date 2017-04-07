@@ -27,10 +27,10 @@ class PickAboutAThird
             var searcherCount = this.searcherCount(me.board.remaining, searcher);
             var oldCount = this.searcherCount(me.board.remaining, old);
             if (Math.abs(searcherCount - target) > Math.abs(oldCount - target)) {
-                log('Breaking down to ' + oldCount + ' or ' + (me.board.remaining.length - oldCount) + ' (not ' + searcherCount + ' or ' + (me.board.remaining.length - searcherCount) + ')');
+                log('Breaking down to ' + oldCount + ' or ' + (me.board.remaining.length - oldCount));
                 return old;
             } else {
-                log('Breaking down to ' + searcherCount + ' or ' + (me.board.remaining.length - searcherCount) + ' (not ' + oldCount + ' or ' + (me.board.remaining.length - oldCount) + ')');
+                log('Breaking down to ' + searcherCount + ' or ' + (me.board.remaining.length - searcherCount));
                 return searcher;
             }
         }
