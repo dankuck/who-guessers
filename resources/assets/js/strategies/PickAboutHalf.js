@@ -59,6 +59,6 @@ class PickAboutHalf
 }
 
 PickAboutHalf.description = "Pick half the board at a time";
-PickAboutAThird.author = "Dan Kuck";
+PickAboutHalf.author = "Dan Kuck";
 
 module.exports = PickAboutHalf;
