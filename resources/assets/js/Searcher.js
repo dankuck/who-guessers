@@ -94,14 +94,14 @@ class Searcher extends And
 Searcher.where = function (...args) {
     return Searcher.prototype.where.apply(new Searcher(), args);
 };
-Searcher.push = function (...args) {
-    return Searcher.prototype.push.apply(new Searcher(), args);
+Searcher.push = function (compare) {
+    return new Searcher().push(compare);
 };
-Searcher.and = function (...args) {
-    return Searcher.prototype.push.apply(new And(), args);
+Searcher.and = function (compares) {
+    return new And(compares);
 };
-Searcher.or = function (...args) {
-    return Searcher.prototype.push.apply(new Or(), args);
+Searcher.or = function (compares) {
+    return new Or(compares);
 };
 Searcher.And = And;
 Searcher.Or = Or;

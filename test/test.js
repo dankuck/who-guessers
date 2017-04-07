@@ -44,6 +44,12 @@ describe('Searcher.And', function() {
             assert.equal(false, and.test("nope"));
         });
     });
+    describe('Searcher.and', function() {
+        it('should succeed on two', function() {
+            var and = Searcher.and([/test/, /ster/]);
+            assert.equal(true, and.test("tester"));
+        });
+    });
 });
 
 describe('Searcher.Or', function() {
@@ -77,6 +83,12 @@ describe('Searcher.Or', function() {
         it('should test false on two', function() {
             var or = new Searcher.Or([/test/, /ster/]);
             assert.equal(false, or.test("nope"));
+        });
+    });
+    describe('Searcher.or', function() {
+        it('should succeed on two', function() {
+            var or = Searcher.or([/test/, /ster/]);
+            assert.equal(true, or.test("tester"));
         });
     });
 });
@@ -142,6 +154,7 @@ describe('Searcher', function() {
             assert.equal(1, tested);
         });
     });
+
 });
 
 describe('Board', function() {
@@ -326,7 +339,7 @@ describe('ChampionshipMatch', function() {
         });
         it('should end match on exceptions', function() {
             var caughtMove;
-            var m = new ChampionshipMatch({}, {}, []);
+            var m = new ChampionshipMatch({}, {}, ClassicWhos);
             m.otherInfo = function(){};
             m.buildStrategy = function() {
                 return {
@@ -398,7 +411,7 @@ describe('ChampionshipMatch', function() {
     });
     describe('#finish', function() {
         it('should finish with player A the winner', function() {
-            var m = new ChampionshipMatch({}, {}, []);
+            var m = new ChampionshipMatch({}, {}, ClassicWhos);
             m.b.who = {name: 'ABC'};
             var result;
             m.onDone(function(doneData) {
@@ -411,7 +424,7 @@ describe('ChampionshipMatch', function() {
             assert(result.players instanceof Array);
         });
         it('should finish with player B the winner', function() {
-            var m = new ChampionshipMatch({}, {}, []);
+            var m = new ChampionshipMatch({}, {}, ClassicWhos);
             m.b.who = 'XYZ';
             var result;
             m.onDone(function(doneData) {
