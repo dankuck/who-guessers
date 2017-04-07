@@ -44,5 +44,6 @@ class PickAnyTrait
 }
 
 PickAnyTrait.description = "Search character traits at random";
+PickAnyTrait.author = "Dan Kuck";
 
 module.exports = PickAnyTrait;

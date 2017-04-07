@@ -20,5 +20,6 @@ class SayAnything
 }
 
 SayAnything.description = "Choose any name";
+SayAnything.author = "Dan Kuck";
 
 module.exports = SayAnything;

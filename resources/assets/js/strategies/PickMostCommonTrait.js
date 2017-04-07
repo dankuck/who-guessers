@@ -50,5 +50,6 @@ class PickMostCommonTrait
 }
 
 PickMostCommonTrait.description = 'Choose trait that matches most whos';
+PickMostCommonTrait.author = "Dan Kuck";
 
 module.exports = PickMostCommonTrait;
