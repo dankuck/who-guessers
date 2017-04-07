@@ -32,6 +32,7 @@
                     :losses="stats.losses_against_others" 
                     :matches="stats.matches" 
                     @click="toggleUnfold(stats.name)"
+                    :show-counts="true"
                 ></win-bar>
                 <div v-if="unfoldedStrategy === stats.name" class="container">
                     <div class="row">
@@ -63,6 +64,7 @@
                                     :wins="competitor.wins_against"
                                     :losses="competitor.is_self ? 0 : competitor.losses_against"
                                     :matches="competitor.matches"
+                                    :show-counts="true"
                                 ></win-bar>
                                 <div class="container">
                                     <div class="col-sm-5">
@@ -73,6 +75,7 @@
                                             :losses="0"
                                             :matches="competitor.matches"
                                             @click="showLogs(stats.name + ' won by answering correctly', competitor.win_logs[REASON_CORRECT_ANSWER])"
+                                            :show-counts="true"
                                         ></win-bar>
                                     </div>
                                     <div class="col-sm-5">
@@ -83,6 +86,7 @@
                                             :losses="0"
                                             :matches="competitor.matches"
                                             @click="showLogs(stats.name + ' won when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered incorrectly', competitor.win_logs[REASON_INCORRECT_ANSWER])"
+                                            :show-counts="true"
                                         ></win-bar>
                                     </div>
                                 </div>
@@ -95,6 +99,7 @@
                                             :wins="0"
                                             :matches="competitor.matches"
                                             @click="showLogs(stats.name + ' lost by answering incorrectly', competitor.loss_logs[REASON_INCORRECT_ANSWER])"
+                                            :show-counts="true"
                                         ></win-bar>
                                     </div>
                                     <div class="col-sm-5">
@@ -105,6 +110,7 @@
                                             :wins="0"
                                             :matches="competitor.matches"
                                             @click="showLogs(stats.name + ' lost when ' + (competitor.is_self ? 'opponent' : competitor.name) + ' answered correctly', competitor.loss_logs[REASON_CORRECT_ANSWER])"
+                                            :show-counts="true"
                                         ></win-bar>
                                     </div>
                                 </div>
@@ -117,6 +123,7 @@
                                             :wins="0"
                                             :matches="competitor.matches"
                                             @click="showLogs(stats.name + ' lost when it threw an exception', competitor.loss_logs[REASON_EXCEPTION_DEFAULT])"
+                                            :show-counts="true"
                                         ></win-bar>
                                     </div>
                                 </div>
@@ -195,19 +202,7 @@ export default {
             if (!this.report) {
                 return null;
             }
-            var stats = Object.values(new ChampionshipReportProcessor(this.report).stats)
-            if (!this.running) {
-                stats = stats.sort((a, b) => {
-                    if (a.wins < b.wins) {
-                        return 1;
-                    } else if (a.wins > b.wins) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                });
-            }
-            return stats;
+            return Object.values(new ChampionshipReportProcessor(this.report).stats);
         },
     },
     methods: {
